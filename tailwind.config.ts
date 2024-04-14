@@ -1,3 +1,4 @@
+import { jade } from '@radix-ui/colors';
 import type { Config } from 'tailwindcss'
 const { mauve, violet } = require('@radix-ui/colors');
 
@@ -8,11 +9,12 @@ export default {
   theme: {
     colors:{
       bgprimary: "#222221",
-      bgsecondary: "#222221",
+      bgsecondary: "#2E3130",
       txtprimary: "#27B08B",
-      txtsecondary: "#27B08B",
+      txtsecondary: "#FFFFFF",
       ...mauve,
       ...violet,
+      ...jade,
     },
     extend: {
       extend: {

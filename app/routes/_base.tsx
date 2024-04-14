@@ -4,16 +4,16 @@ import { ChevronDownIcon } from "@radix-ui/react-icons";
 import { forwardRef } from "react";
 import { Outlet } from "@remix-run/react";
 import DarkToggle from "~/components/buttons/DarkModeToggle";
-
-// interface Props {
-//   children?: ReactNode;
-//   value?: string;
-//   // ref?: any
-// }
-
-export type Ref = any;
-
-export interface AccordionItemProps {}
+import {
+  ExpertSuggestionCard,
+  ExpertSuggestionCardDetail,
+} from "~/components/cards/ExpertSuggestionCard";
+import {
+  ProfileCard,
+  ProfileCardTooltip,
+  ProfileCardWithHover,
+} from "~/components/cards/ProfileCard";
+import MainHeader from "~/components/navigation/MainHeader";
 
 export const meta: MetaFunction = () => {
   return [
@@ -22,25 +22,31 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export default function Index() {
+export default function IndexLayout() {
   return (
     <>
-      {/* <header><DarkToggle/></header> */}
+      <MainHeader />
       <Outlet />
+      
+      {/* <ExpertSuggestionCard />
+      <ExpertSuggestionCardDetail />
+      <ProfileCard />
+      <ProfileCard />
+      <Outlet />
+      <ProfileCardTooltip />
+      <ProfileCardWithHover /> */}
     </>
   );
 }
-
 
 // export async function action({request} :ActionFunctionArgs) {
 //     const formData = await request.formData()
 //     const darkToggle =  Object.fromEntries(formData)
 //     console.log(darkToggle);
 //     console.log('hello');
-    
+
 //     return {
-//       darkToggle  
+//       darkToggle
 //     }
-  
+
 //   }
-  
