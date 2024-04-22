@@ -13,7 +13,7 @@ export function ProfileCardWithHover() {
 export function ProfileCard() {
   return (
     <>
-      <div className="flex bg-bgsecondary h-fit w-fit rounded-md gap-3 border-solid border-mauve1 border-b-2 mb-2 pr-12 pl-4 py-2">
+      <div className="flex bg-bgprimary h-fit w-fit rounded-md gap-3 border-solid border-mauve1 border-b-2 mb-2 pr-12 pl-4 py-2">
         <div>
           <ProfileImg />
         </div>

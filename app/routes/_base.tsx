@@ -27,14 +27,6 @@ export default function IndexLayout() {
     <>
       <MainHeader />
       <Outlet />
-      
-      {/* <ExpertSuggestionCard />
-      <ExpertSuggestionCardDetail />
-      <ProfileCard />
-      <ProfileCard />
-      <Outlet />
-      <ProfileCardTooltip />
-      <ProfileCardWithHover /> */}
     </>
   );
 }

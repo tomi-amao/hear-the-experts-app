@@ -10,8 +10,12 @@ function MainHeader() {
           <li className="flex-1">
             <HamburgerMenu />
           </li>
-          <li className="flex-1 w-32">
+          <li className=" w-32">
             <h1 className="text-jade9 text-sm"> About </h1>
+          </li>
+          <li className="flex-1">
+            <Link to={'/dashboard'} className="text-jade9 text-sm"> Dashboard </Link>
+
           </li>
           <li>
             <DarkModeToggle />

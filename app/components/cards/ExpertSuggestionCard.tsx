@@ -24,7 +24,7 @@ export function ExpertSuggestionCard(props: CardProps) {
   return (
     <>
       <div
-        className="w-80 rounded-xl cursor-pointer "
+        className="w-80 rounded-xl cursor-pointer  "
         onClick={() => {
           cardDetailHandler();
         }}
@@ -40,7 +40,7 @@ export function ExpertSuggestionCard(props: CardProps) {
         </section>
         {showCardDetail ? (
 
-          <div className="transition-all ease-in-out duration-500  ">
+          <div className="transition-all ease-in-out duration-500 w-10/12 ">
             <div className="flex flex-col pl-3 pt-4 gap-3 shrink ">
               <h1 className="text-txtprimary  text-lg pt-1 ">
                 {props.title}
@@ -55,7 +55,7 @@ export function ExpertSuggestionCard(props: CardProps) {
             </div>
           </div>
         ) : (
-          <div className="text-txtprimary text-4xl pl-3 pt-4 w-fit ease-in-out duration-500 ">
+          <div className=" text-4xl pl-3 pt-4 w-fit ease-in-out duration-500 ">
             <h1> {props.title} </h1>
         </div>
         )}

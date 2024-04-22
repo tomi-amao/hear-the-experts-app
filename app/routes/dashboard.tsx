@@ -2,7 +2,7 @@ import type { ActionFunctionArgs, MetaFunction } from "@remix-run/node";
 import * as Accordion from "@radix-ui/react-accordion";
 import { CheckIcon, ChevronDownIcon } from "@radix-ui/react-icons";
 import { ReactNode, forwardRef, useState } from "react";
-import { Outlet } from "@remix-run/react";
+import { Link, Outlet, useActionData } from "@remix-run/react";
 // import SelectDropdown from "~/components/utils/SelectDropdown";
 import {
   CardProps,
@@ -13,6 +13,7 @@ import * as Select from "@radix-ui/react-select";
 import React from "react";
 import { PrimaryButton, SecondaryButton } from "~/components/utils/BasicButton";
 import { ProfileCard } from "~/components/cards/ProfileCard";
+import MainHeader from "~/components/navigation/MainHeader";
 
 // interface Props {
 //   children?: ReactNode;
@@ -45,31 +46,27 @@ const SUGGESTION_DATA: SuggestionData[] = [
     dateCreated: new Date().toDateString(),
     categories: ["Application Support", " Networking"],
   },
-  {
-    detail: "Bandiwth limits need to be increased by 20%",
-    title: "High Latency Between User Requests",
-    dateCreated: new Date().toDateString(),
-    categories: ["Application Support", " Networking"],
-  },
-  {
-    detail: "Bandiwth limits need to be increased by 20%",
-    title: "High Latency Between User Requests",
-    dateCreated: new Date().toDateString(),
-    categories: ["Application Support", "Pipeline"],
-  },
+
 ];
 
 // const SUGGESTION_DATA_FILTERED = SUGGESTION_DATA.reduce((accumulator, currrent) => { return accumulator + currrent.key}, 0)
-const SUGGESTION_DATA_FILTERED = SUGGESTION_DATA.filter((suggestion) =>
-  suggestion.categories.includes("Pipeline")
-);
-console.log(SUGGESTION_DATA_FILTERED);
+// const SUGGESTION_DATA_FILTERED = SUGGESTION_DATA.filter((suggestion) =>
+//   suggestion.categories.includes("Pipeline")
+// );
+// console.log(SUGGESTION_DATA_FILTERED);
 
 // r
 
 export default function Index() {
+  const actiondata = useActionData<typeof action>()
+  console.log(actiondata);
+  
+
+  
   return (
     <>
+      <MainHeader />
+
       <div className=" grid grid-cols-[1fr]">
         <div className="flex h-fit md:m-4 text-3xl text-jade11 md:mx-12 justify-center -ml-7 w-full md:w-fit md:ml-12 pb-2">
           {" "}
@@ -79,11 +76,13 @@ export default function Index() {
           {/* <SelectDropdown /> */}
           <SelectDropdown />
           <PrimaryButton />
-          <SecondaryButton />
+          <Link to="suggestion/create">
+            <SecondaryButton />
+          </Link>
         </div>
 
         <div className="flex gap-4 flex-wrap md:w-fit h-fit justify-center md:ml-12 md:justify-start py-2  text-txtprimary col-start-1">
-          {SUGGESTION_DATA.map((item) => (
+          {actiondata?.map((item) => (
             <ExpertSuggestionCard
               title={item.title}
               categories={item.categories}
@@ -122,14 +121,14 @@ export default function Index() {
                   categories={item.categories}
                   dateCreated={item.dateCreated}
                   detail={item.detail}
-                  key={item}
+                  key={item.dateCreated}
                 />
               </div>
             ))}
           </div>
         </div>
-        
       </div>
+      <Outlet />
     </>
   );
 }
@@ -141,7 +140,7 @@ interface SelectItemProps {
 
 export const SelectDropdown = () => {
   const [selection, setSelection] = useState<string>();
-  console.log(selection);
+  // console.log(selection);
 
   return (
     <form action="" method="post">
@@ -206,3 +205,29 @@ const SelectItem = React.forwardRef<Ref, SelectItemProps>(
 //   // console.log('hello');
 
 // }
+
+export async function action({request} :ActionFunctionArgs) {
+  const data = await request.formData()
+  const formData =  Object.fromEntries(data)
+
+
+  
+
+  SUGGESTION_DATA.push({detail: formData.name, title: formData.username, dateCreated: new Date().toDateString(), categories: ["Finance", "Human Relations"]})
+  // console.log(SUGGESTION_DATA);
+  
+  // // const NEW_SUGGESSTION_DATA = 
+  // console.log(NEW_SUGGESSTION_DATA);
+  
+  
+  // console.log(formData);
+  return(
+    SUGGESTION_DATA
+    
+  )
+  // console.log('hello');
+  // detail: string;
+  // title: string;
+  // dateCreated: string;
+  // categories: string[];
+}
