@@ -1,5 +1,4 @@
-import type { ActionFunctionArgs, MetaFunction } from "@remix-run/node";
-import * as Accordion from "@radix-ui/react-accordion";
+import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
 import { CheckIcon, ChevronDownIcon } from "@radix-ui/react-icons";
 import { ReactNode, forwardRef, useState } from "react";
 import { Link, Outlet, useActionData } from "@remix-run/react";
@@ -14,21 +13,13 @@ import React from "react";
 import { PrimaryButton, SecondaryButton } from "~/components/utils/BasicButton";
 import { ProfileCard } from "~/components/cards/ProfileCard";
 import MainHeader from "~/components/navigation/MainHeader";
-
-// interface Props {
-//   children?: ReactNode;
-//   value?: string;
-//   // ref?: any
-// }
-
-export type Ref = any;
-
-export interface AccordionItemProps {}
+import { requireUserId } from "~/models/user.server";
+import { getSession } from "~/services/session.server";
 
 export const meta: MetaFunction = () => {
   return [
-    { title: "New Remix App" },
-    { name: "description", content: "Welcome to Remix!" },
+    { title: "Dashboard" },
+    { name: "description", content: "Suggest and Complain" },
   ];
 };
 
@@ -46,23 +37,15 @@ const SUGGESTION_DATA: SuggestionData[] = [
     dateCreated: new Date().toDateString(),
     categories: ["Application Support", " Networking"],
   },
-
 ];
 
 // const SUGGESTION_DATA_FILTERED = SUGGESTION_DATA.reduce((accumulator, currrent) => { return accumulator + currrent.key}, 0)
 // const SUGGESTION_DATA_FILTERED = SUGGESTION_DATA.filter((suggestion) =>
 //   suggestion.categories.includes("Pipeline")
 // );
-// console.log(SUGGESTION_DATA_FILTERED);
 
-// r
-
-export default function Index() {
-  const actiondata = useActionData<typeof action>()
-  console.log(actiondata);
-  
-
-  
+export default function Dashboard() {
+  const actiondata = useActionData<typeof action>();
   return (
     <>
       <MainHeader />
@@ -128,6 +111,7 @@ export default function Index() {
           </div>
         </div>
       </div>
+
       <Outlet />
     </>
   );
@@ -198,36 +182,31 @@ const SelectItem = React.forwardRef<Ref, SelectItemProps>(
   }
 );
 
-// export async function action({request} :ActionFunctionArgs) {
-//   const formData = await request.formData()
-//   const selectedItem =  Object.fromEntries(formData)
-//   console.log(selectedItem);
-//   // console.log('hello');
+export async function action({ request }: ActionFunctionArgs) {
+  const data = await request.formData();
+  const formData = Object.fromEntries(data);
+  console.log(formData);
 
-// }
+  SUGGESTION_DATA.push({
+    detail: formData.name,
+    title: formData.username,
+    dateCreated: new Date().toDateString(),
+    categories: ["Finance", "Human Relations"],
+  });
 
-export async function action({request} :ActionFunctionArgs) {
-  const data = await request.formData()
-  const formData =  Object.fromEntries(data)
+  return SUGGESTION_DATA;
+}
 
-
+export async function loader({request}: LoaderFunctionArgs) {
+  const userId = await requireUserId(request)
+  // console.log(request.headers.get('Cookie'));
   
+  const session = await getSession(request)
+  console.log(session.has("userId")
+);
 
-  SUGGESTION_DATA.push({detail: formData.name, title: formData.username, dateCreated: new Date().toDateString(), categories: ["Finance", "Human Relations"]})
-  // console.log(SUGGESTION_DATA);
-  
-  // // const NEW_SUGGESSTION_DATA = 
-  // console.log(NEW_SUGGESSTION_DATA);
+  console.log(session.get("userId"), 'working');
   
   
-  // console.log(formData);
-  return(
-    SUGGESTION_DATA
-    
-  )
-  // console.log('hello');
-  // detail: string;
-  // title: string;
-  // dateCreated: string;
-  // categories: string[];
+  return {userId}
 }

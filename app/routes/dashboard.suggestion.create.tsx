@@ -8,7 +8,6 @@ export default function CreateSuggestion() {
     navigate("/dashboard");
   };
 
-
   return (
     <>
       <Dialog.Root defaultOpen>

@@ -1,27 +1,85 @@
-import { Form, Link, NavLink, useLoaderData } from "@remix-run/react";
-import DarkModeToggle from "../buttons/DarkModeToggle";
+import {
+  Form,
+  Link,
+  NavLink,
+  useFetcher,
+  useLoaderData,
+} from "@remix-run/react";
+import * as Switch from "@radix-ui/react-switch";
+import { MoonIcon, SunIcon } from "@radix-ui/react-icons";
+import { useState } from "react";
 
 function MainHeader() {
-  const userId = useLoaderData();
+  const [signInState, setSignInState] = useState('login');
+  // const handleSignInState = (prevalue: boolean) => {
+  //   setSignInState(!prevalue)
+  // } 
 
   return (
-      <nav className="">
-        <ul className="flex items-center p-4">
-          <li className="flex-1">
-            <HamburgerMenu />
+    <nav className="">
+      <ul className="flex items-center  p-2">
+        <li className="flex-1">
+          <HamburgerMenu />
+        </li>
+        <li className=" w-32">
+          <h1 className="text-jade9 text-sm"> About </h1>
+        </li>
+        <li className="flex-1">
+          <Link to={"/dashboard"} className="text-jade9 text-sm">
+            {" "}
+            Dashboard{" "}
+          </Link>
+        </li>
+        <Form method="post" action="/login">
+          <li className="w-fit px-2 py-1 rounded-sm mx-3 text-sm bg-txtprimary">
+            <button onClick={() => setSignInState(signInState == 'login' ? 'register' : 'login')} name="_action" value={signInState}>Sign in</button>
           </li>
-          <li className=" w-32">
-            <h1 className="text-jade9 text-sm"> About </h1>
-          </li>
-          <li className="flex-1">
-            <Link to={'/dashboard'} className="text-jade9 text-sm"> Dashboard </Link>
+        </Form>
+        <li>
+          <DarkModeToggle />
+        </li>
+      </ul>
+    </nav>
+  );
+}
 
-          </li>
-          <li>
-            <DarkModeToggle />
-          </li>
-        </ul>
-      </nav>
+export function DarkModeToggle() {
+  const [darkMode, setDarkMode] = useState(true);
+
+  const fetcher = useFetcher();
+  const mode = useLoaderData();
+
+  const checkChangeHandler = () => {
+    if (darkMode) {
+      setDarkMode((preValue) => !preValue);
+      console.log(darkMode);
+    } else if (!darkMode) {
+      setDarkMode((preValue) => !preValue);
+      console.log(darkMode);
+    }
+  };
+
+  return (
+    <Form method="post" action="/">
+      <div className="">
+        <Switch.Root
+          className=" w-[42px] h-[25px] bg-bgprimary6 dark:bg-txtprimary rounded-full relative shadow-[0_2px_10px] shadow-bgprimary4 focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-black outline-none cursor-default"
+          // style={{ 'WebkitTapHighlightColor': 'rgba(0, 0, 0, 0)' }}
+          onCheckedChange={checkChangeHandler}
+          name="darkToggle"
+          type="submit"
+        >
+          {/* conditionally render light/dark icon based on the mode */}
+          <Switch.Thumb className="flex items-center w-[21px] h-[21px] bg-white rounded-full shadow-[0_2px_2px] shadow-bgprimary4 transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[19px]">
+            {darkMode ? (
+              <SunIcon className="m-1" />
+            ) : (
+              <MoonIcon className="m-1" />
+            )}
+          </Switch.Thumb>
+        </Switch.Root>
+      </div>
+    </Form>
   );
 }
 
