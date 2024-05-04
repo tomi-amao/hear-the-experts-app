@@ -1,8 +1,8 @@
-import type { ActionFunctionArgs, MetaFunction } from "@remix-run/node";
+import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
 import * as Accordion from "@radix-ui/react-accordion";
 import { ChevronDownIcon } from "@radix-ui/react-icons";
 import { forwardRef } from "react";
-import { Outlet } from "@remix-run/react";
+import { Outlet, redirect, useLoaderData } from "@remix-run/react";
 import DarkToggle from "~/components/buttons/DarkModeToggle";
 import {
   ExpertSuggestionCard,
@@ -14,6 +14,8 @@ import {
   ProfileCardWithHover,
 } from "~/components/cards/ProfileCard";
 import MainHeader from "~/components/navigation/MainHeader";
+import { logout } from "~/services/session.server";
+import { requireUserId } from "~/models/user.server";
 
 export const meta: MetaFunction = () => {
   return [
@@ -23,12 +25,30 @@ export const meta: MetaFunction = () => {
 };
 
 export default function IndexLayout() {
+  const userId: string = useLoaderData();
+
   return (
     <>
-      <MainHeader />
+      <MainHeader userId={userId} />
       <Outlet />
     </>
   );
+}
+
+export async function action({ request }: ActionFunctionArgs) {
+  const formData = await request.formData();
+  const action = formData.get("_action");
+
+  switch (action) {
+    case "logout": {
+      return await logout(request);
+    }
+    case "signin": {
+      return redirect("login");
+    }
+    default:
+      break;
+  }
 }
 
 // export async function action({request} :ActionFunctionArgs) {

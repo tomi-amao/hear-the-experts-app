@@ -2,18 +2,26 @@ import {
   Form,
   Link,
   NavLink,
+  useActionData,
   useFetcher,
   useLoaderData,
 } from "@remix-run/react";
 import * as Switch from "@radix-ui/react-switch";
 import { MoonIcon, SunIcon } from "@radix-ui/react-icons";
 import { useState } from "react";
+import {
+  ActionFunctionArgs,
+  LoaderFunctionArgs,
+  redirect,
+} from "@remix-run/node";
+import { requireUserId } from "~/models/user.server";
+import { logout } from "~/services/session.server";
 
-function MainHeader() {
-  const [signInState, setSignInState] = useState('login');
-  // const handleSignInState = (prevalue: boolean) => {
-  //   setSignInState(!prevalue)
-  // } 
+interface props {
+  userId: string
+}
+
+function MainHeader(props: props) {
 
   return (
     <nav className="">
@@ -30,9 +38,11 @@ function MainHeader() {
             Dashboard{" "}
           </Link>
         </li>
-        <Form method="post" action="/login">
+        <Form method="post" action="/login" >
           <li className="w-fit px-2 py-1 rounded-sm mx-3 text-sm bg-txtprimary">
-            <button onClick={() => setSignInState(signInState == 'login' ? 'register' : 'login')} name="_action" value={signInState}>Sign in</button>
+            <button name="_action" value={props.userId ? "logout" : "signin"}>
+              {props.userId ? "Sign Out" : "Sign In"}
+            </button>
           </li>
         </Form>
         <li>
@@ -42,6 +52,8 @@ function MainHeader() {
     </nav>
   );
 }
+
+
 
 export function DarkModeToggle() {
   const [darkMode, setDarkMode] = useState(true);

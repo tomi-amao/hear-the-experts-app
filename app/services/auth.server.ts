@@ -1,5 +1,5 @@
 import { Authenticator } from "remix-auth";
-import { sessionStorage } from "~/services/session.server";
+import { getSession, sessionStorage } from "~/services/session.server";
 
 import { FormStrategy } from "remix-auth-form";
 import { verifyLogin } from "~/models/user.server";
@@ -11,7 +11,7 @@ import invariant from "tiny-invariant";
 
 
 
-export let authenticator = new Authenticator(sessionStorage, { sessionKey: "userId"});
+export let authenticator = new Authenticator(sessionStorage, { sessionKey: "userId", sessionErrorKey: "error"});
 
 // Tell the Authenticator to use the form strategy
 authenticator.use(

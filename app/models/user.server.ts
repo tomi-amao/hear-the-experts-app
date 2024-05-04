@@ -2,12 +2,13 @@ import { prisma } from "~/services/db.server";
 import invariant from "tiny-invariant";
 
 import type { User } from "@prisma/client";
-import { json } from "@remix-run/node";
+import { json, redirect } from "@remix-run/node";
 
 export type { User } from "@prisma/client";
 import argon2 from "argon2";
 import { LoginForm, RegisterForm } from "./types.server";
-import { getSession } from "~/services/session.server";
+import { getSession, sessionStorage } from "~/services/session.server";
+import { authenticator } from "~/services/auth.server";
 
 export const getUserById = () => {
   return {};
@@ -16,6 +17,8 @@ export const getUserById = () => {
 export const getUserByEmail = () => {};
 
 export const deleteUserByEmail = () => {};
+
+//function creating a user
 export const createUser = async (user: RegisterForm) => {
   try {
     // hashes the password provided in the registration
@@ -40,7 +43,13 @@ export const createUser = async (user: RegisterForm) => {
   }
 };
 
-export const register = async (user: RegisterForm) => {
+// function registering and logging in a user
+export const register = async (
+  user: RegisterForm,
+  request: Request,
+  formData: FormData
+) => {
+  // check if email inputted by user exists
   const userExists = await prisma.user.count({ where: { email: user.email } });
   if (userExists) {
     return json(
@@ -48,13 +57,14 @@ export const register = async (user: RegisterForm) => {
       { status: 400 }
     );
   }
-
+  // validate user input
   invariant(typeof user.email === "string", "email must be a string");
   invariant(user.email.length > 0, "username must not be empty");
 
   invariant(typeof user.password === "string", "password must be a string");
   invariant(user.password.length > 0, "password must not be empty");
 
+  // create user based on form input
   const newUser = await createUser(user);
 
   if (!newUser) {
@@ -66,31 +76,78 @@ export const register = async (user: RegisterForm) => {
       { status: 400 }
     );
   }
-
-  return newUser;
+  // create a session based on user input
+  const session = await createUserSession(request, formData);
+  return session;
 };
 
+// check user inputted credentials
 export const verifyLogin = async (email: string, password: string) => {
   // query for a user with a matching email.
   const user = await prisma.user.findUnique({ where: { email: email } });
-  const verifyPassword = await argon2.verify(user!.password, password)
+  const verifyPassword = await argon2.verify(user!.password, password);
 
   if (!user || !verifyPassword) {
     throw new Error("Incorrect Login");
-    ;
   }
-//   invariant(user, 'User not found')
-//   invariant((await argon2.verify(user.password, password)), 'Incorrect password')
-  
-  
 
   return { user };
 };
 
+// create user session based on request and user input
+export const createUserSession = async (
+  request: Request,
+  formData: FormData
+) => {
+  // create a session with a cookie, handled by remix-auth
+  const user = await authenticator.authenticate("user-pass", request, {
+    failureRedirect: "/login",
+    // use parsed in formData as context instead of calling request again to retrieve form data
+    context: { formData },
+  });
+  // retrieve the current session
+  const session = await getSession(request);
 
-export const requireUserId = async (request: Request, redirectTo: string = new URL(request.url).pathname) => {
-    const session = await getSession(request)
-    const userId = session.get('userId')
-    return userId
-}
 
+  session.set(authenticator.sessionKey, user.user.id);
+  // create new header with committed session cookie
+  const headers = new Headers({
+    "Set-Cookie": await sessionStorage.commitSession(session),
+  });
+
+  return headers;
+};
+
+export const requireUserId = async (
+  request: Request,
+  redirectTo: string = new URL(request.url).pathname
+) => {
+  const session = await getSession(request);
+
+  
+  const userId = session.get("userId");
+  
+  
+
+  return userId;
+};
+
+export const authError = async (
+  request: Request,
+  redirectTo: string = new URL(request.url).pathname
+) => {
+  const session = await getSession(request);
+  const authError = session.get('error')
+  console.log(authError);
+  
+  
+  
+
+  return authError;
+};
+
+export const logout = async (request: Request) => {
+  console.log("successfully signed out");
+
+  await authenticator.logout(request, { redirectTo: "/login" });
+};

@@ -1,7 +1,17 @@
-import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
+import type {
+  ActionFunctionArgs,
+  LoaderFunctionArgs,
+  MetaFunction,
+} from "@remix-run/node";
 import { CheckIcon, ChevronDownIcon } from "@radix-ui/react-icons";
 import { ReactNode, forwardRef, useState } from "react";
-import { Link, Outlet, useActionData } from "@remix-run/react";
+import {
+  Link,
+  Outlet,
+  redirect,
+  useActionData,
+  useLoaderData,
+} from "@remix-run/react";
 // import SelectDropdown from "~/components/utils/SelectDropdown";
 import {
   CardProps,
@@ -15,6 +25,7 @@ import { ProfileCard } from "~/components/cards/ProfileCard";
 import MainHeader from "~/components/navigation/MainHeader";
 import { requireUserId } from "~/models/user.server";
 import { getSession } from "~/services/session.server";
+import { authenticator } from "~/services/auth.server";
 
 export const meta: MetaFunction = () => {
   return [
@@ -45,10 +56,11 @@ const SUGGESTION_DATA: SuggestionData[] = [
 // );
 
 export default function Dashboard() {
-  const actiondata = useActionData<typeof action>();
+  const actionData = useActionData<typeof action>();
+  const userId: string = useLoaderData<typeof loader>();
   return (
     <>
-      <MainHeader />
+      <MainHeader userId={userId} />
 
       <div className=" grid grid-cols-[1fr]">
         <div className="flex h-fit md:m-4 text-3xl text-jade11 md:mx-12 justify-center -ml-7 w-full md:w-fit md:ml-12 pb-2">
@@ -65,7 +77,7 @@ export default function Dashboard() {
         </div>
 
         <div className="flex gap-4 flex-wrap md:w-fit h-fit justify-center md:ml-12 md:justify-start py-2  text-txtprimary col-start-1">
-          {actiondata?.map((item) => (
+          {actionData?.map((item) => (
             <ExpertSuggestionCard
               title={item.title}
               categories={item.categories}
@@ -197,16 +209,18 @@ export async function action({ request }: ActionFunctionArgs) {
   return SUGGESTION_DATA;
 }
 
-export async function loader({request}: LoaderFunctionArgs) {
-  const userId = await requireUserId(request)
-  // console.log(request.headers.get('Cookie'));
-  
-  const session = await getSession(request)
-  console.log(session.has("userId")
-);
+export async function loader({ request }: LoaderFunctionArgs) {
+  // const userId = await requireUserId(request)
+  // // console.log(request.headers.get('Cookie'));
+  // console.log(userId);
+  // if (!userId) {
+  //   return redirect('/login')
+  // }
+  let user = await authenticator.isAuthenticated(request);
+  if (user) {
+    return {};
+  } else {
+    return redirect("/login");
+  }
 
-  console.log(session.get("userId"), 'working');
-  
-  
-  return {userId}
 }
