@@ -72,7 +72,7 @@ export default function Dashboard() {
           <SelectDropdown />
           <PrimaryButton />
           <Link to="suggestion/create">
-            <SecondaryButton />
+            <SecondaryButton  text="Suggest an Idea"/>
           </Link>
         </div>
 
@@ -105,7 +105,9 @@ export default function Dashboard() {
           <div className="flex flex-row ml-16 mb-2">
             <SelectDropdown />
             <PrimaryButton />
-            <SecondaryButton />
+            <Link to="problem/create">
+            <SecondaryButton  text="Highlight a Problem"/>
+          </Link>
           </div>
 
           <div className="flex flex-col md:flex-row md:w-fit gap-4 md:ml-12">
@@ -199,14 +201,13 @@ export async function action({ request }: ActionFunctionArgs) {
   const formData = Object.fromEntries(data);
   console.log(formData);
 
-  SUGGESTION_DATA.push({
-    detail: formData.name,
-    title: formData.username,
-    dateCreated: new Date().toDateString(),
-    categories: ["Finance", "Human Relations"],
-  });
+  
+  
 
-  return SUGGESTION_DATA;
+
+
+
+  return {};
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {

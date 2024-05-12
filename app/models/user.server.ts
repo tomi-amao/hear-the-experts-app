@@ -10,8 +10,8 @@ import { LoginForm, RegisterForm } from "./types.server";
 import { getSession, sessionStorage } from "~/services/session.server";
 import { authenticator } from "~/services/auth.server";
 
-export const getUserById = () => {
-  return {};
+export const getUserById = async (userId: string) => {
+  return await prisma.user.findUnique({where: {id: userId}});
 };
 
 export const getUserByEmail = () => {};
@@ -108,7 +108,6 @@ export const createUserSession = async (
   // retrieve the current session
   const session = await getSession(request);
 
-
   session.set(authenticator.sessionKey, user.user.id);
   // create new header with committed session cookie
   const headers = new Headers({
@@ -124,10 +123,7 @@ export const requireUserId = async (
 ) => {
   const session = await getSession(request);
 
-  
-  const userId = session.get("userId");
-  
-  
+  const userId = session.get("userId")?.toString();
 
   return userId;
 };
@@ -137,11 +133,8 @@ export const authError = async (
   redirectTo: string = new URL(request.url).pathname
 ) => {
   const session = await getSession(request);
-  const authError = session.get('error')
+  const authError = session.get("error");
   console.log(authError);
-  
-  
-  
 
   return authError;
 };
@@ -150,4 +143,11 @@ export const logout = async (request: Request) => {
   console.log("successfully signed out");
 
   await authenticator.logout(request, { redirectTo: "/login" });
+};
+
+export const getOtherUser = (userId: string) => {
+  return prisma.user.findMany({
+    where: { id: { not: userId } },
+    orderBy: { profile: { firstName: "asc" } },
+  });
 };

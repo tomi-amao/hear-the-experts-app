@@ -4,7 +4,6 @@ import { redirect } from "@remix-run/react";
 import { authenticator } from "~/services/auth.server";
 // import SelectDropdown from "~/components/utils/SelectDropdown";
 
-
 export const meta: MetaFunction = () => {
   return [
     { title: "New Remix App" },
@@ -22,7 +21,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 };
 
 export default function Index() {
-
+  return {}
 }
 
 // export async function action({request} :ActionFunctionArgs) {
