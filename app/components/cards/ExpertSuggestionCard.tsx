@@ -1,13 +1,16 @@
 import { useState } from "react";
 
 export interface CardProps {
-  detail: string;
+  content: string;
   title: string;
-  dateCreated: string;
-  categories: string[];
+  updatedAt: string;
+  tags: string[];
+  status: string;
   
 
 }
+
+import { DropdownMenuDemo } from "../utils/MenuDropdown";
 
 export function ExpertSuggestionCard(props: CardProps) {
   const [showCardDetail, setShowCardDetail] = useState(false);
@@ -19,7 +22,7 @@ export function ExpertSuggestionCard(props: CardProps) {
       setShowCardDetail((prevalue) => !prevalue);
     }
   };
-  const categories = props.categories
+  const tags = props.tags
 
   return (
     <>
@@ -35,7 +38,7 @@ export function ExpertSuggestionCard(props: CardProps) {
             <ChatIcon />
           </span>
           <section className="flex grow flex-row-reverse">
-            <DotsVerticalIcon />
+            <DropdownMenuDemo/>
           </section>
         </section>
         {showCardDetail ? (
@@ -46,12 +49,12 @@ export function ExpertSuggestionCard(props: CardProps) {
                 {props.title}
               </h1>
               <p className="text-xs text-jade9 pb-2">
-                {props.detail}
+                {props.content}
               </p>
               <ul className="flex text-xs text-jade11 gap-1">
-                {categories.map((item) => <li key={item}> {`${item},`}</li>)}
+                {tags.map((item) => <li key={item}> {`${item},`}</li>)}
               </ul>
-              <p className="text-xs text-mauve10"> {props.dateCreated} </p>
+              <p className="text-xs text-mauve10"> {props.updatedAt} </p>
             </div>
           </div>
         ) : (

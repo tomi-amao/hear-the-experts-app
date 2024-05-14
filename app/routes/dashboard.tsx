@@ -8,6 +8,7 @@ import { ReactNode, forwardRef, useState } from "react";
 import {
   Link,
   Outlet,
+  json,
   redirect,
   useActionData,
   useLoaderData,
@@ -23,9 +24,10 @@ import React from "react";
 import { PrimaryButton, SecondaryButton } from "~/components/utils/BasicButton";
 import { ProfileCard } from "~/components/cards/ProfileCard";
 import MainHeader from "~/components/navigation/MainHeader";
-import { requireUserId } from "~/models/user.server";
+import { User, requireUserId } from "~/models/user.server";
 import { getSession } from "~/services/session.server";
 import { authenticator } from "~/services/auth.server";
+import { getUserPosts } from "~/models/posts.server";
 
 export const meta: MetaFunction = () => {
   return [
@@ -34,33 +36,18 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-interface SuggestionData {
-  detail: string;
-  title: string;
-  dateCreated: string;
-  categories: string[];
-}
-
-const SUGGESTION_DATA: SuggestionData[] = [
-  {
-    detail: "Bandiwth limits need to be increased by 20%",
-    title: "High Latency Between User Requests",
-    dateCreated: new Date().toDateString(),
-    categories: ["Application Support", " Networking"],
-  },
-];
-
-// const SUGGESTION_DATA_FILTERED = SUGGESTION_DATA.reduce((accumulator, currrent) => { return accumulator + currrent.key}, 0)
-// const SUGGESTION_DATA_FILTERED = SUGGESTION_DATA.filter((suggestion) =>
-//   suggestion.categories.includes("Pipeline")
-// );
 
 export default function Dashboard() {
   const actionData = useActionData<typeof action>();
-  const userId: string = useLoaderData<typeof loader>();
+  const loaderData = useLoaderData<typeof loader>();
+  const userPosts = loaderData.userPosts
+  console.log(userPosts, 'help');
+  
+  
+
   return (
     <>
-      <MainHeader userId={userId} />
+      <MainHeader userId={loaderData.user} /> 
 
       <div className=" grid grid-cols-[1fr]">
         <div className="flex h-fit md:m-4 text-3xl text-jade11 md:mx-12 justify-center -ml-7 w-full md:w-fit md:ml-12 pb-2">
@@ -77,7 +64,7 @@ export default function Dashboard() {
         </div>
 
         <div className="flex gap-4 flex-wrap md:w-fit h-fit justify-center md:ml-12 md:justify-start py-2  text-txtprimary col-start-1">
-          {actionData?.map((item) => (
+          {/* {actionData?.map((item) => (
             <ExpertSuggestionCard
               title={item.title}
               categories={item.categories}
@@ -85,7 +72,7 @@ export default function Dashboard() {
               detail={item.detail}
               key={item}
             />
-          ))}
+          ))} */}
         </div>
         <div className=" hidden md:flex md:flex-row-reverse md:col-start-2 md:pr-4">
           <div className="flex flex-col">
@@ -96,8 +83,8 @@ export default function Dashboard() {
           {/* <ProfileCardWithHover/> */}
         </div>
       </div>
-      <div className=" grid grid-cols-[1fr]">
-        <div className="h-fit w-full bg-txtprimary text-bgsecondary md:justify-start rounded-md py-4">
+      <div className=" grid grid-cols-[1fr]  overflow-scroll">
+        <div className="h-fit w-full bg-txtprimary text-bgsecondary md:justify-start rounded-md py-4 ">
           <div className="text-bgprimary m-auto text-3xl w-fit md:ml-12 pr-20 py-2 ">
             {" "}
             Plaguing Problems{" "}
@@ -111,14 +98,15 @@ export default function Dashboard() {
           </div>
 
           <div className="flex flex-col md:flex-row md:w-fit gap-4 md:ml-12">
-            {SUGGESTION_DATA.map((item) => (
+            {userPosts.map((problem) => (
               <div className="bg-bgprimary rounded-md py-2 h-fit w-fit m-auto text-txtprimary">
                 <ExpertSuggestionCard
-                  title={item.title}
-                  categories={item.categories}
-                  dateCreated={item.dateCreated}
-                  detail={item.detail}
-                  key={item.dateCreated}
+                  title={problem.title}
+                  tags={problem.tags}
+                  updatedAt={problem.updatedAt}
+                  content={problem.content}
+                  key={problem.id}
+                  status={problem.status}
                 />
               </div>
             ))}
@@ -211,15 +199,13 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  // const userId = await requireUserId(request)
-  // // console.log(request.headers.get('Cookie'));
-  // console.log(userId);
-  // if (!userId) {
-  //   return redirect('/login')
-  // }
   let user = await authenticator.isAuthenticated(request);
   if (user) {
-    return {};
+    const userId = await requireUserId(request)
+    const userPosts = await getUserPosts(userId!)
+    console.log('working');
+    
+    return json({userPosts, user}, {status: 200})
   } else {
     return redirect("/login");
   }

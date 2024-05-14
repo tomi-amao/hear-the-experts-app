@@ -1,6 +1,10 @@
-import { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
-import { Form, useActionData } from "@remix-run/react";
-import { useEffect, useRef, useState } from "react";
+import {
+  ActionFunctionArgs,
+  LoaderFunctionArgs,
+  redirect,
+} from "@remix-run/node";
+import { Form, useActionData, useNavigation } from "@remix-run/react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { FormField } from "~/components/utils/FormField";
 import { Modal } from "~/components/utils/Modal";
 import SelectDropdown from "~/components/utils/SelectDropdown";
@@ -15,6 +19,8 @@ export default function CreateProblem() {
 
   const actionData = useActionData<typeof action>();
   const userTag = actionData?.tag;
+  const navigation = useNavigation();
+  const isSubmitting = navigation.formAction === "/dashboard/problem/create";
 
   useEffect(() => {
     if (userTag !== undefined && !postTags.includes(userTag)) {
@@ -28,20 +34,16 @@ export default function CreateProblem() {
   const filterTags = (tag: string) => {
     console.log(typeof tag);
     console.log(typeof postTags[0]);
-    const filterTags = postTags.filter((option) => option !== tag)
+    const filterTags = postTags.filter((option) => option !== tag);
 
-    setPostTags(filterTags)
-    
-    
-
-    
-  }
+    setPostTags(filterTags);
+  };
 
   return (
     <Modal returnTo="/dashboard">
       <div className="w-full">
         <Form action="/dashboard/problem/create" method="post">
-          <fieldset className="mb-[15px] flex gap-5">
+          <fieldset className="mb-[15px] flex gap-5" disabled={isSubmitting}>
             <FormField label="Title" type="text" htmlFor="title" />
           </fieldset>
           <fieldset className="mb-[15px] flex items-center gap-5">
@@ -53,10 +55,12 @@ export default function CreateProblem() {
           </fieldset>
 
           <SelectDropdown values={dropdownOptions} />
-          <ul className="flex text-mauve12 gap-2 w-fit">
+          <ul className="flex text-mauve12 gap-2 w-fit mt-2">
             {postTags.map((tag, n) => (
               <li
-                onClick={() => {filterTags(tag)}}
+                onClick={() => {
+                  filterTags(tag);
+                }}
                 className="rounded-md bg-txtprimary p-1 px-2 text-xs "
                 key={tag}
               >
@@ -69,11 +73,35 @@ export default function CreateProblem() {
           <div className="mt-[25px] flex justify-end">
             <button
               type="submit"
+              disabled={isSubmitting}
               className="bg-txtprimary text-green11 hover:bg-green5 focus:shadow-green7 inline-flex h-[35px] items-center justify-center rounded-[4px] px-[15px] font-medium leading-none focus:shadow-[0_0_0_2px] focus:outline-none"
               name="_action"
               value="createProblem"
             >
-              Save changes
+              {isSubmitting ? (
+                <><svg
+                  className="animate-spin -ml-1 mr-3 h-5 w-5 text-mauve12 "
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg><p> Creating...</p></>
+              ) : (
+                "Save"
+              )}
             </button>
           </div>
         </Form>
@@ -96,11 +124,11 @@ export async function action({ request }: ActionFunctionArgs) {
     formData.tags = formData.postTags.split(",");
     formData.authorId = userId;
 
-
     console.log(formData);
 
     const newPost = await createPost(formData);
     console.log(newPost);
+    return redirect("/dashboard");
   }
 
   // console.log(newPost);
