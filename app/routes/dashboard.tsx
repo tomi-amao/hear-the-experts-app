@@ -4,7 +4,7 @@ import type {
   MetaFunction,
 } from "@remix-run/node";
 import { CheckIcon, ChevronDownIcon } from "@radix-ui/react-icons";
-import { ReactNode, forwardRef, useState } from "react";
+import { ReactNode, forwardRef, useEffect, useState } from "react";
 import {
   Link,
   Outlet,
@@ -12,12 +12,15 @@ import {
   redirect,
   useActionData,
   useLoaderData,
+  useNavigate,
+  useSubmit,
 } from "@remix-run/react";
 // import SelectDropdown from "~/components/utils/SelectDropdown";
 import {
   CardProps,
   ExpertSuggestionCard,
 } from "~/components/cards/ExpertSuggestionCard";
+import { Prisma } from "@prisma/client";
 
 import * as Select from "@radix-ui/react-select";
 import React from "react";
@@ -27,7 +30,9 @@ import MainHeader from "~/components/navigation/MainHeader";
 import { User, requireUserId } from "~/models/user.server";
 import { getSession } from "~/services/session.server";
 import { authenticator } from "~/services/auth.server";
-import { getUserPosts } from "~/models/posts.server";
+import { deletePost, getUserPosts } from "~/models/posts.server";
+import { SearchBar } from "~/components/utils/SearchBar";
+import {SelectDropdown as CustomSelectDropdown} from "~/components/utils/SelectDropdown";
 
 export const meta: MetaFunction = () => {
   return [
@@ -36,18 +41,58 @@ export const meta: MetaFunction = () => {
   ];
 };
 
+import { Posts } from "@prisma/client";
+
 
 export default function Dashboard() {
   const actionData = useActionData<typeof action>();
   const loaderData = useLoaderData<typeof loader>();
-  const userPosts = loaderData.userPosts
-  console.log(userPosts, 'help');
-  
-  
+  const userPosts = loaderData.userPosts;
+  console.log(userPosts, "help");
+  const sortOptions = ['date', 'author']
+  const filterOptions = ["Pipelines", "Network", "App Support"]
+  const [tagFilter, setTagFilter] = useState<string[]>([]) 
+  const [tagSort, setTagSort] = useState<string>() 
 
+
+  const submit = useSubmit();
+  const navigate = useNavigate()
+
+  const sortCards = (option: string) => {
+    setTagSort(option)
+
+    return {};
+  };
+
+// useEffect hook with tagFilter as dependency
+
+  useEffect(() => {
+      //  effect runs whenever tagFilter changes (including initial render)
+
+    if (tagFilter.length > 0) {
+      navigate({
+        pathname: "/dashboard",
+        search: `?filter=${encodeURIComponent(JSON.stringify(tagFilter))}&sort=${tagSort}`,
+      });
+    }
+  }, [tagFilter, tagSort]);
+
+  const filterCards = (option: string) => {
+    if (!tagFilter.includes(option)) {
+
+      setTagFilter((prevTagFilter) => [...prevTagFilter, option]);
+    console.log(tagFilter, 'tags');
+
+    }
+
+
+    
+
+    return {};
+  };
   return (
     <>
-      <MainHeader userId={loaderData.user} /> 
+      <MainHeader userId={loaderData.user} />
 
       <div className=" grid grid-cols-[1fr]">
         <div className="flex h-fit md:m-4 text-3xl text-jade11 md:mx-12 justify-center -ml-7 w-full md:w-fit md:ml-12 pb-2">
@@ -57,9 +102,10 @@ export default function Dashboard() {
         <div className="flex w-full md:w-fit md:ml-12 gap-2 justify-center col-start-1  ">
           {/* <SelectDropdown /> */}
           <SelectDropdown />
+
           <PrimaryButton />
           <Link to="suggestion/create">
-            <SecondaryButton  text="Suggest an Idea"/>
+            <SecondaryButton text="Suggest an Idea" />
           </Link>
         </div>
 
@@ -93,14 +139,19 @@ export default function Dashboard() {
             <SelectDropdown />
             <PrimaryButton />
             <Link to="problem/create">
-            <SecondaryButton  text="Highlight a Problem"/>
-          </Link>
+              <SecondaryButton text="Highlight a Problem" />
+            </Link>
+            <SearchBar/>
+            <CustomSelectDropdown values={sortOptions} action={sortCards}/>
+            <CustomSelectDropdown values={filterOptions} action={filterCards}/>
+
           </div>
 
           <div className="flex flex-col md:flex-row md:w-fit gap-4 md:ml-12">
             {userPosts.map((problem) => (
               <div className="bg-bgprimary rounded-md py-2 h-fit w-fit m-auto text-txtprimary">
                 <ExpertSuggestionCard
+                  postId={problem.id}
                   title={problem.title}
                   tags={problem.tags}
                   updatedAt={problem.updatedAt}
@@ -188,12 +239,9 @@ export async function action({ request }: ActionFunctionArgs) {
   const data = await request.formData();
   const formData = Object.fromEntries(data);
   console.log(formData);
-
-  
-  
-
-
-
+  if (formData._action === "deletePost") {
+    return await deletePost(formData.postId.toString());
+  }
 
   return {};
 }
@@ -201,13 +249,43 @@ export async function action({ request }: ActionFunctionArgs) {
 export async function loader({ request }: LoaderFunctionArgs) {
   let user = await authenticator.isAuthenticated(request);
   if (user) {
-    const userId = await requireUserId(request)
-    const userPosts = await getUserPosts(userId!)
-    console.log('working');
+    const userId = await requireUserId(request);
+    let userPosts = await getUserPosts(userId!, {}, {});
+    console.log("working");
+    const url = new URL(request.url)
+    const sort = url.searchParams.get('sort')
     
-    return json({userPosts, user}, {status: 200})
+    const tags = url.searchParams.get('filter')
+    let filter: string[] = []
+    //parse tags in the form of a strinified array into an actual array
+    // only parse if there is a filter query
+    if (tags) {
+      filter = JSON.parse(tags)
+      
+    }
+    console.log(sort, filter);
+    
+    let sortOptions: Prisma.PostsOrderByWithRelationInput = {}
+    if (sort) {
+      if (sort === 'date') {
+        sortOptions = {createdAt: 'desc'}
+      }
+      if (sort === 'sender') {
+        sortOptions = {author: { profile: {firstName: "desc"}}}
+      }
+    }
+    console.log(url);
+    
+    let tagFilter: Prisma.PostsWhereInput = {}
+    if (filter) {
+      tagFilter = {
+        tags:{hasSome: filter}
+      }
+    }
+    userPosts = await getUserPosts(userId!, sortOptions, tagFilter )
+
+    return json({ userPosts, user }, { status: 200 });
   } else {
     return redirect("/login");
   }
-
 }

@@ -3,11 +3,11 @@ import {
   LoaderFunctionArgs,
   redirect,
 } from "@remix-run/node";
-import { Form, useActionData, useNavigation } from "@remix-run/react";
+import { Form, useActionData, useNavigation, useSubmit } from "@remix-run/react";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { FormField } from "~/components/utils/FormField";
 import { Modal } from "~/components/utils/Modal";
-import SelectDropdown from "~/components/utils/SelectDropdown";
+import {SelectDropdown} from "~/components/utils/SelectDropdown";
 import { createPost } from "~/models/posts.server";
 import { getUserById, requireUserId } from "~/models/user.server";
 
@@ -30,7 +30,7 @@ export default function CreateProblem() {
 
   console.log(postTags[1]);
   const submitTags = [...postTags];
-
+ 
   const filterTags = (tag: string) => {
     console.log(typeof tag);
     console.log(typeof postTags[0]);
@@ -39,6 +39,15 @@ export default function CreateProblem() {
     setPostTags(filterTags);
   };
 
+  const submit = useSubmit();
+
+  const addTag = (option: string) => {
+    submit(
+      { tag: option },
+      { method: "POST", action: "/dashboard/problem/create" }
+    );
+    return {};
+  };
   return (
     <Modal returnTo="/dashboard">
       <div className="w-full">
@@ -54,7 +63,7 @@ export default function CreateProblem() {
             <FormField type="hidden" htmlFor="type" value="EXPERT" />
           </fieldset>
 
-          <SelectDropdown values={dropdownOptions} />
+          <SelectDropdown values={dropdownOptions} action={addTag}/>
           <ul className="flex text-mauve12 gap-2 w-fit mt-2">
             {postTags.map((tag, n) => (
               <li

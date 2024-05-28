@@ -6,6 +6,7 @@ export interface CardProps {
   updatedAt: string;
   tags: string[];
   status: string;
+  postId: string
   
 
 }
@@ -38,7 +39,7 @@ export function ExpertSuggestionCard(props: CardProps) {
             <ChatIcon />
           </span>
           <section className="flex grow flex-row-reverse">
-            <DropdownMenuDemo/>
+            <DropdownMenuDemo userId={props.postId}/>
           </section>
         </section>
         {showCardDetail ? (

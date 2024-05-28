@@ -20,12 +20,14 @@ interface SelectItemProps {
 
 interface props {
   values: string[];
+  action: (option: string) => {}
 }
 
-const SelectDropdown = (props: props) => {
+export const SelectDropdown = (props: props) => {
   const [selection, setSelection] = useState<string>();
   //   console.log(selection);
   const values = props.values;
+  const action = props.action
   console.log(values);
   const [tag, setTag] = useState<string>();
   const submit = useSubmit();
@@ -61,7 +63,7 @@ const SelectDropdown = (props: props) => {
           <Select.Viewport className="p-[5px] bg-bgprimary">
             <Select.Group>
               {values.map((option) => (
-                <div onClick={() => {addTag(option)}}>
+                <div onClick={() => {action(option)}}>
                   <span className="absolute z-10 w-full text-jade10"> {option}</span>
                   <SelectItem  value={option}> {option} </SelectItem>
                 </div>
@@ -97,4 +99,3 @@ const SelectItem = React.forwardRef<Ref, SelectItemProps>(
   }
 );
 
-export default SelectDropdown;

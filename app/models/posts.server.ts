@@ -1,6 +1,6 @@
 import { prisma } from "~/services/db.server";
 
-import { Posts } from "@prisma/client";
+import { Posts, Prisma } from "@prisma/client";
 
 export const createPost = async (postData: Posts) => {
   const post = await prisma.posts.create({
@@ -17,9 +17,10 @@ export const createPost = async (postData: Posts) => {
   console.log(post);
 };
 
-export const getUserPosts = async (userId: string) => {
+export const getUserPosts = async (userId: string, sortFilter: Prisma.PostsOrderByWithRelationInput , whereFilter: Prisma.PostsWhereInput) => {
   const userPosts = await prisma.posts.findMany({
-    where: {authorId: userId}
+    orderBy: {...sortFilter},
+    where: {authorId: userId ,...whereFilter}
   })
   // console.log(userPosts[0].posts);
   // console.log(userPosts);
@@ -29,4 +30,7 @@ export const getUserPosts = async (userId: string) => {
 
 export const deletePost = async (id: string) => {
   const deletePost = await prisma.posts.delete({where: {id}})
+  console.log(deletePost);
+  
+  return deletePost
 }
