@@ -60,7 +60,10 @@ export default function Dashboard() {
 
   const sortCards = (option: string) => {
     setTagSort(option)
-
+    navigate({
+      pathname: "/dashboard",
+      search: `?sort=${option}`,
+    })
     return {};
   };
 
@@ -257,7 +260,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     
     const tags = url.searchParams.get('filter')
     let filter: string[] = []
-    //parse tags in the form of a strinified array into an actual array
+    //parse tags in the form of a stringified array into an actual array
     // only parse if there is a filter query
     if (tags) {
       filter = JSON.parse(tags)
@@ -277,7 +280,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
     console.log(url);
     
     let tagFilter: Prisma.PostsWhereInput = {}
-    if (filter) {
+    // do not add tag filter if there are no tags
+    if (filter && filter.length > 0) {
       tagFilter = {
         tags:{hasSome: filter}
       }

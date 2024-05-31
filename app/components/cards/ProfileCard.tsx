@@ -31,7 +31,7 @@ export function ProfileImg() {
     <Avatar.Root className="bg-blackA1 inline-flex h-[45px] w-[45px] select-none items-center justify-center overflow-hidden rounded-full align-middle">
       <Avatar.Image
         className="h-full w-full rounded-[inherit] object-cover"
-        src="https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80"
+        src="https://images.unsplash.com/photo-1603415526960-f7e0328c63b1?&w=128&h=128&dpr=2&q=80"
         alt="Colm Tuite"
       />
 

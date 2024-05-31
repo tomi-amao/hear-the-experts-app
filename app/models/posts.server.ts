@@ -22,6 +22,8 @@ export const getUserPosts = async (userId: string, sortFilter: Prisma.PostsOrder
     orderBy: {...sortFilter},
     where: {authorId: userId ,...whereFilter}
   })
+  console.log(whereFilter);
+  
   // console.log(userPosts[0].posts);
   // console.log(userPosts);
   
