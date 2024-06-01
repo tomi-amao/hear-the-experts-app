@@ -60,6 +60,7 @@ export default function CreateProblem() {
       dialogDescription="Make changes to your profile here. Click save when you're done."
       setShowProfileManage={() => {}}
       modalWidth="[450px]"
+      childrenStyle="flex flex-col w-full items-center"
     >
       <div className="w-full">
         <Form action="/dashboard/problem/create" method="post">

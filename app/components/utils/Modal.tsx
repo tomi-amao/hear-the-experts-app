@@ -3,30 +3,37 @@ import { Cross2Icon } from "@radix-ui/react-icons";
 import { Form, Link, useNavigate } from "@remix-run/react";
 import { Dispatch, SetStateAction } from "react";
 
-
-
 interface props {
-  children: React.ReactNode, 
-  returnTo: string,
-  setShowProfileManage: Dispatch<SetStateAction<boolean>>,
-  dialogTitle?: string,
-  dialogDescription?: string
-  modalWidth: string,
-  modalHeight?: string
+  children: React.ReactNode;
+  returnTo: string;
+  setShowProfileManage: Dispatch<SetStateAction<boolean>>;
+  dialogTitle?: string;
+  dialogDescription?: string;
+  modalWidth: string;
+  modalHeight?: string;
+  childrenStyle: string
+
 }
 
-export function Modal({children, returnTo, setShowProfileManage, dialogTitle, dialogDescription, modalWidth = "[200px]"}: props) {
+export function Modal({
+  children,
+  returnTo,
+  setShowProfileManage,
+  dialogTitle,
+  dialogDescription,
+  modalWidth = "[50vw]",
+  childrenStyle
+}: props) {
+  const navigate = useNavigate();
+  const modalCloseHandler = (page: string) => {
+    setShowProfileManage(false);
+    navigate(page);
+  };
 
-    const navigate = useNavigate();
-    const modalCloseHandler = (page: string) => {
-      setShowProfileManage(false)
-      navigate(page);
-    };
-
-    const contentStyle = `bg-bgprimary data-[state=open]:animate-contentShow fixed top-[50%] left-[50%] flex flex-col items-baseline max-h-[85vh] w-[90vw] max-w-${modalWidth} translate-x-[-50%] translate-y-[-50%] rounded-[6px] p-[25px] focus:outline-none`
-    return (
+  const contentStyle = `bg-bgprimary data-[state=open]:animate-contentShow fixed top-[50%] left-[50%] flex flex-col items-baseline max-h-[85vh] w-${modalWidth} max-w-450px translate-x-[-50%] translate-y-[-50%] rounded-[6px] p-[25px] focus:outline-none`;
+  return (
     <>
-     <Dialog.Root defaultOpen>
+      <Dialog.Root defaultOpen>
         <Dialog.Portal>
           <Dialog.Overlay className="bg-blackA6 data-[state=open]:animate-overlayShow fixed inset-0" />
           <Dialog.Content
@@ -35,17 +42,20 @@ export function Modal({children, returnTo, setShowProfileManage, dialogTitle, di
               modalCloseHandler(returnTo);
             }}
           >
-            <Dialog.Title className="text-jade9 m-0 text-[17px] font-medium">
+            {dialogDescription && <>  <Dialog.Title className="text-jade9 m-0 text-[17px] font-medium">
               {dialogTitle}
             </Dialog.Title>
             <Dialog.Description className="text-mauve11 mt-[10px] mb-5 text-[15px] leading-normal">
               {dialogDescription}
-            </Dialog.Description>
-            <div className="flex flex-col w-full items-center">
-            {children}
-            </div>
+            </Dialog.Description> </>}
+            <div className={childrenStyle}>{children}</div>
 
-            <Dialog.Close asChild onClick={() => {setShowProfileManage(false)}}>
+            <Dialog.Close
+              asChild
+              onClick={() => {
+                setShowProfileManage(false);
+              }}
+            >
               <Link
                 to="."
                 className="text-violet11 hover:bg-violet4 focus:shadow-violet7 absolute top-[10px] right-[10px] inline-flex h-[25px] w-[25px] appearance-none items-center justify-center rounded-full focus:shadow-[0_0_0_2px] focus:outline-none"
@@ -58,4 +68,5 @@ export function Modal({children, returnTo, setShowProfileManage, dialogTitle, di
         </Dialog.Portal>
       </Dialog.Root>
     </>
-)}
+  );
+}

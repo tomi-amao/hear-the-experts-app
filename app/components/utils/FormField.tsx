@@ -40,7 +40,7 @@ export function FormField({
           type={type}
           id={htmlFor}
           name={htmlFor}
-          className="bg-mauve9 rounded-sm mb-3 p-1"
+          className="bg-bgsecondary rounded-sm mb-3 p-1 h-6 border-x-txtprimary border"
           value={value}
           aria-label={htmlFor}
           autoComplete={autocomplete}
