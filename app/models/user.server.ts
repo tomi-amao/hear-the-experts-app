@@ -1,7 +1,7 @@
 import { prisma } from "~/services/db.server";
 import invariant from "tiny-invariant";
 
-import type { User } from "@prisma/client";
+import type { Profile, User } from "@prisma/client";
 import { json, redirect } from "@remix-run/node";
 
 export type { User } from "@prisma/client";
@@ -9,9 +9,28 @@ import argon2 from "argon2";
 import { LoginForm, RegisterForm } from "./types.server";
 import { getSession, sessionStorage } from "~/services/session.server";
 import { authenticator } from "~/services/auth.server";
+import {  Prisma } from "@prisma/client";
 
-export const getUserById = async (userId: string) => {
-  return await prisma.user.findUnique({where: {id: userId}});
+
+export const getUserById = async (userId: string, query: Prisma.UserSelect) => {
+  return await prisma.user.findUnique({where: {id: userId}, select: {...query}});
+
+};
+
+
+
+export const updateUser = async (userId: string, profile: Partial<Profile>) => {
+  await prisma.user.update({
+    where: {
+      id: userId,
+    },
+    data: {
+      profile: {
+        update: profile,
+      },
+    },
+  });
+  return json({message: "Successfully updated user"}, {status: 200})
 };
 
 export const getUserByEmail = () => {};
@@ -127,6 +146,8 @@ export const requireUserId = async (
 
   return userId;
 };
+
+
 
 export const authError = async (
   request: Request,

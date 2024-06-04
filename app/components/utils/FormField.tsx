@@ -8,6 +8,7 @@ interface FormFieldProps {
   onChange?: (...args: any) => any;
   autocomplete?: string;
   error?: string;
+  placeholder?: string
 }
 
 export function FormField({
@@ -18,6 +19,7 @@ export function FormField({
   autocomplete,
   onChange = () => {},
   error = "",
+  placeholder,
 }: FormFieldProps) {
   const [errorText, setErrorText] = useState(error);
 
@@ -44,6 +46,7 @@ export function FormField({
           value={value}
           aria-label={htmlFor}
           autoComplete={autocomplete}
+          placeholder={placeholder}
         />
         <div className="text-xs font-semibold text-center tracking-wide text-red-500 w-full">
           {errorText || ""}

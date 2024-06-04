@@ -38,6 +38,7 @@ export function Modal({
           <Dialog.Overlay className="bg-blackA6 data-[state=open]:animate-overlayShow fixed inset-0" />
           <Dialog.Content
             className={contentStyle}
+            // does not work with firefox browser
             onInteractOutside={() => {
               modalCloseHandler(returnTo);
             }}

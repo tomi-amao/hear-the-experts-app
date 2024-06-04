@@ -20,7 +20,7 @@ interface SelectItemProps {
 
 interface props {
   values: string[];
-  action: (option: string) => {}
+  action?: (option: string) => {}
 }
 
 export const SelectDropdown = (props: props) => {

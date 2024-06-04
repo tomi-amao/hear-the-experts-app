@@ -4,7 +4,7 @@ import type {
   MetaFunction,
 } from "@remix-run/node";
 import { CheckIcon, ChevronDownIcon } from "@radix-ui/react-icons";
-import { ReactNode, forwardRef, useEffect, useState } from "react";
+import { ReactNode, forwardRef, useEffect, useId, useState } from "react";
 import {
   Link,
   Outlet,
@@ -27,12 +27,14 @@ import React from "react";
 import { PrimaryButton, SecondaryButton } from "~/components/utils/BasicButton";
 import { ProfileCard } from "~/components/cards/ProfileCard";
 import MainHeader from "~/components/navigation/MainHeader";
-import { User, requireUserId } from "~/models/user.server";
+import { User, getUserById, requireUserId } from "~/models/user.server";
 import { getSession } from "~/services/session.server";
 import { authenticator } from "~/services/auth.server";
 import { deletePost, getUserPosts } from "~/models/posts.server";
 import { SearchBar } from "~/components/utils/SearchBar";
 import {SelectDropdown as CustomSelectDropdown} from "~/components/utils/SelectDropdown";
+import { Posts } from "@prisma/client";
+import { getUserAvatar } from "~/services/fileUpload.server";
 
 export const meta: MetaFunction = () => {
   return [
@@ -41,18 +43,18 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-import { Posts } from "@prisma/client";
 
 
 export default function Dashboard() {
   const actionData = useActionData<typeof action>();
-  const loaderData = useLoaderData<typeof loader>();
-  const userPosts = loaderData.userPosts;
+  const {user, userDetails, userPosts} = useLoaderData<typeof loader>();
+  
   console.log(userPosts, "help");
   const sortOptions = ['date', 'author']
   const filterOptions = ["Pipelines", "Network", "App Support"]
   const [tagFilter, setTagFilter] = useState<string[]>([]) 
   const [tagSort, setTagSort] = useState<string>() 
+  
 
 
   const submit = useSubmit();
@@ -67,7 +69,7 @@ export default function Dashboard() {
     return {};
   };
 
-// useEffect hook with tagFilter as dependency
+// useEffect hook with tagFilter as dependency, needed to handle navigate sideeffect when changing url to filter cards
 
   useEffect(() => {
       //  effect runs whenever tagFilter changes (including initial render)
@@ -95,7 +97,7 @@ export default function Dashboard() {
   };
   return (
     <>
-      <MainHeader userId={loaderData.user} />
+      <MainHeader userId={user} userDetails={userDetails}/>
 
       <div className=" grid grid-cols-[1fr]">
         <div className="flex h-fit md:m-4 text-3xl text-jade11 md:mx-12 justify-center -ml-7 w-full md:w-fit md:ml-12 pb-2">
@@ -253,8 +255,11 @@ export async function loader({ request }: LoaderFunctionArgs) {
   let user = await authenticator.isAuthenticated(request);
   if (user) {
     const userId = await requireUserId(request);
+    const userDetails = await getUserById(userId!, {profile: true, email: true})
+    
     let userPosts = await getUserPosts(userId!, {}, {});
     console.log("working");
+    console.log(userDetails, "QUERRYY");
     const url = new URL(request.url)
     const sort = url.searchParams.get('sort')
     
@@ -287,8 +292,11 @@ export async function loader({ request }: LoaderFunctionArgs) {
       }
     }
     userPosts = await getUserPosts(userId!, sortOptions, tagFilter )
+    const userAvatar = await getUserById(userId!, {profile:{select:{profilePicture:true}}})
+    const userAvatarUrl = userAvatar?.profile.profilePicture
 
-    return json({ userPosts, user }, { status: 200 });
+
+    return json({ userPosts, user, userDetails, userAvatarUrl}, { status: 200 });
   } else {
     return redirect("/login");
   }

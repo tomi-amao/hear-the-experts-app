@@ -6,17 +6,32 @@ import * as Tabs from "@radix-ui/react-tabs";
 import { Form } from "@remix-run/react";
 import { FormField } from "../utils/FormField";
 import { PrimaryButton, SecondaryButton } from "../utils/BasicButton";
+import { Profile } from "@prisma/client";
+import { SelectDropdown } from "../utils/SelectDropdown";
 
 interface props {
   setShowProfileManage: Dispatch<SetStateAction<boolean>>;
+  user: {
+    profile: {
+      firstName: string;
+      lastName: string;
+      username: string | null;
+      profilePicture: string | null;
+      role: string | null;
+      type: string | null;
+    };
+    email: string;
+  };
 }
 
-export default function ManageProfile({ setShowProfileManage }: props) {
+export default function ManageProfile({ setShowProfileManage, user }: props) {
+  const roleOptions = ["Software", "Finance", "Human Resources"];
+
   return (
     <Modal
       returnTo="."
       setShowProfileManage={setShowProfileManage}
-      modalWidth="[80vw]"
+      modalWidth="[90vw]"
       childrenStyle="w-full"
     >
       <Tabs.Root
@@ -24,42 +39,42 @@ export default function ManageProfile({ setShowProfileManage }: props) {
         orientation="vertical"
         className="grid grid-cols-[0.4fr_1fr] col-span-2 w-full"
       >
-        <div className="row-span-2 flex-col gap-10  flex">
-        <div className="flex items-center gap-2 w-fit">
-          <DisplayPicture
-            imgURL="https://images.unsplash.com/photo-1603415526960-f7e0328c63b1?&w=128&h=128&dpr=2&q=80"
-            imgSize="60"
-            imgFallback=""
-          />
-          <div className="flex flex-col p-2">
-            <h1 className="text-txtprimary"> Matt Wright</h1>
-            <h2 className="text-txtprimary"> mattwright@gmail.com</h2>
+        <div className="row-span-2 flex-col  flex">
+          <div className="flex items-center gap-2 w-fit">
+            <DisplayPicture
+              imgURL={user.profile.profilePicture!}
+              imgSize="45"
+              imgFallback=""
+            />
+            <div className="flex flex-col p-2">
+              <h1 className="text-txtprimary"> {user.profile?.username} </h1>
+              <h2 className="text-txtprimary"> {user.email} </h2>
+            </div>
           </div>
-        </div>
-        <Tabs.List className="flex text-txtprimary mt-2 shrink col-start-1">
-          <div className="flex flex-col w-fit">
-            <Tabs.Trigger value="account">
-              <li className="flex gap-3 m-1 hover:bg-txtprimary hover:text-mauve2 rounded-md px-2">
-                <AccountIcon /> Account
-              </li>
-            </Tabs.Trigger>
-            <Tabs.Trigger value="settings">
-              <li className="flex gap-3 m-1 hover:bg-txtprimary hover:text-mauve2 rounded-md px-2">
-                <SettingsIcon /> Settings
-              </li>
-            </Tabs.Trigger>
-            <Tabs.Trigger value="notifications">
-              <li className="flex gap-3 m-1 hover:bg-txtprimary hover:text-mauve2 rounded-md px-2">
-                <NotificationIcon /> Notifications
-              </li>
-            </Tabs.Trigger>
-            <Tabs.Trigger value="language">
-              <li className="flex gap-3 m-1 hover:bg-txtprimary hover:text-mauve2 rounded-md px-2">
-                <RegionIcon /> Language & Region
-              </li>
-            </Tabs.Trigger>
-          </div>
-        </Tabs.List>
+          <Tabs.List className="flex text-txtprimary mt-2 shrink col-start-1">
+            <div className="flex flex-col w-fit">
+              <Tabs.Trigger value="account">
+                <li className="flex gap-3 m-1 hover:bg-txtprimary hover:text-mauve2 rounded-md px-2">
+                  <AccountIcon /> Account
+                </li>
+              </Tabs.Trigger>
+              <Tabs.Trigger value="settings">
+                <li className="flex gap-3 m-1 hover:bg-txtprimary hover:text-mauve2 rounded-md px-2">
+                  <SettingsIcon /> Settings
+                </li>
+              </Tabs.Trigger>
+              <Tabs.Trigger value="notifications">
+                <li className="flex gap-3 m-1 hover:bg-txtprimary hover:text-mauve2 rounded-md px-2">
+                  <NotificationIcon /> Notifications
+                </li>
+              </Tabs.Trigger>
+              <Tabs.Trigger value="language">
+                <li className="flex gap-3 m-1 hover:bg-txtprimary hover:text-mauve2 rounded-md px-2">
+                  <RegionIcon /> Language & Region
+                </li>
+              </Tabs.Trigger>
+            </div>
+          </Tabs.List>
         </div>
         <div className="flex col-start-2 row-start-1 row-span-2 grow text-txtprimary">
           <Tabs.Content value="account" className="w-full">
@@ -67,65 +82,80 @@ export default function ManageProfile({ setShowProfileManage }: props) {
               {" "}
               My Profile{" "}
             </h1>
-            <div className="pt-4 mx-4 flex flex-row  w-fit">
-              <div className="flex-col items-center pt-2">
-                <DisplayPicture
-                  imgURL="https://images.unsplash.com/photo-1603415526960-f7e0328c63b1?&w=128&h=128&dpr=2&q=80"
-                  imgSize="50"
-                  imgFallback=""
-                />
-                <h2 className="flex flex-row gap-2 items-center">
+            <Form method="post" action="/profile/manage" encType="multipart/form-data">
+              <div className="pt-4 mx-4 flex flex-row  w-fit">
+                <div className="flex-col items-center pt-2">
+                  <DisplayPicture
+                    imgURL={user.profile.profilePicture!}
+                    imgSize="45"
+                    imgFallback=""
+                  />
+
+                  <input
+                    id="avatar"
+                    type="file"
+                    name="avatar"
+                    accept="image/*"
+                    className="overflow-hidden h-[1px] w-[1px] absolute "
+                  />
+                  <label
+                    htmlFor="avatar"
+                    className="flex flex-row gap-1 mt-1 items-center cursor-pointer hover:underline"
+                  >
+                    Edit <EditIcon />
+                  </label>
+                </div>
+
+                <div className="px-10">
                   {" "}
-                  Edit <EditIcon />{" "}
-                </h2>
-              </div>
-              <div className="px-10">
-                {" "}
-                <Form>
-                  <fieldset>
                     <FormField
                       label="Preferred Name"
                       type="text"
                       htmlFor="username"
+                      placeholder={user.profile.username}
                     />
-                    <FormField
+                    {/* <FormField
                       label="Department"
                       type="text"
                       htmlFor="department"
+                      
+                    /> */}
+                    <FormField
+                      label="Job role"
+                      type="text"
+                      htmlFor="role"
+                      placeholder={user.profile.role!}
                     />
-                    <FormField label="Job role" type="text" htmlFor="role" />
-                  </fieldset>
+                    {/* <SelectDropdown values={roleOptions} /> */}
                   <div className="flex w-full flex-row-reverse">
                     <SecondaryButton text="Save" />
                   </div>
-                </Form>{" "}
+                </div>
               </div>
-            </div>
+            </Form>{" "}
             <h1 className="border-b-2 border-jade10 pb-4 pt-2 mx-4">
               Account security
             </h1>
             <div className="pt-4  px-4   w-full">
-
-                <h2 className="flex w-full justify-between "> Email <SecondaryButton text="Change email" /> </h2> 
-                <h3 className="text-jade11"> mattwright@gmail.com</h3>
-
-
+              <h2 className="flex w-full justify-between ">
+                {" "}
+                Email <SecondaryButton text="Change email" />{" "}
+              </h2>
+              <h3 className="text-jade11"> {user.email}</h3>
             </div>
             <div className="pt-4  px-4   w-full">
-
-                <h2 className="flex w-full justify-between "> Password <SecondaryButton text="Change password" /> </h2> 
-                <h3 className="text-jade11"> ********* </h3>
-
-
+              <h2 className="flex w-full justify-between ">
+                {" "}
+                Password <SecondaryButton text="Change password" />{" "}
+              </h2>
+              <h3 className="text-jade11"> ********* </h3>
             </div>
             <div className="pt-4  px-4   w-full">
-
-                <h2 className="flex w-full justify-between "> Two-step Verification <SecondaryButton text="Enable" /> </h2> 
-
-
+              <h2 className="flex w-full justify-between ">
+                {" "}
+                Two-step Verification <SecondaryButton text="Enable" />{" "}
+              </h2>
             </div>
-
-
           </Tabs.Content>
           <Tabs.Content value="settings">
             <p>settings</p>

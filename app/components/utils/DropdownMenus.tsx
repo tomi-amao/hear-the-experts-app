@@ -10,15 +10,31 @@ import { ActionFunctionArgs } from "@remix-run/node";
 import { deletePost } from "~/models/posts.server";
 import { useSubmit } from "@remix-run/react";
 import { DisplayPicture } from "./DisplayPicture";
+import { Profile, User } from "@prisma/client";
 
 export interface MenuProps {
-  userId?: string;
+  userDetails: {
+    profile: {
+      firstName: string;
+      lastName: string;
+      username: string | null;
+      profilePicture: string | null;
+      role: string | null;
+      type: string | null;
+    };
+    email: string;
+  };
   trigger: JSX.Element;
   menuItems: [{ profile: JSX.Element }, { inbox: JSX.Element }];
   menuItems2: [];
 }
 
-export const DropdownMenus = ({ trigger, menuItems, userId, menuItems2 }: MenuProps) => {
+export const DropdownMenus = ({
+  trigger,
+  menuItems,
+  userDetails,
+  menuItems2,
+}: MenuProps) => {
   const submit = useSubmit();
   const deletePostById = async (postId: string) => {
     submit(
@@ -27,21 +43,18 @@ export const DropdownMenus = ({ trigger, menuItems, userId, menuItems2 }: MenuPr
     );
     return {};
   };
+  //create a new object extracting the first key-pair in the object, seperating the action and the dropdown menu item
   const dropdownItems = menuItems.map((option) => {
     const [key, value] = Object.entries(option)[0];
-    const [actionKey, action ] = (Object.entries(option)[1]);
-    
-    
-    return { key, value, action}; // Create a new object with key and value
+    const [actionKey, action] = Object.entries(option)[1];
+
+    return { key, value, action }; // Create a new object with key and value
   });
   const dropdownItems2 = menuItems2.map((option) => {
     const [key, value] = Object.entries(option)[0];
-    const [actionKey, action ] = (Object.entries(option)[1]);
+    const [actionKey, action] = Object.entries(option)[1];
 
-
-    
-    
-    return { key, value, action}; // Create a new object with key and value
+    return { key, value, action }; // Create a new object with key and value
   });
   console.log(typeof menuItems);
 
@@ -51,50 +64,52 @@ export const DropdownMenus = ({ trigger, menuItems, userId, menuItems2 }: MenuPr
         <button aria-label="Customise options">{trigger}</button>
       </DropdownMenu.Trigger>
 
-
       <DropdownMenu.Portal>
         <DropdownMenu.Content
           className="min-w-[250px] bg-bgprimary rounded-md p-[5px] shadow-[0px_10px_38px_-10px_rgba(22,_23,_24,_0.35),_0px_10px_20px_-15px_rgba(22,_23,_24,_0.2)] will-change-[opacity,transform] data-[side=top]:animate-slideDownAndFade data-[side=right]:animate-slideLeftAndFade data-[side=bottom]:animate-slideUpAndFade data-[side=left]:animate-slideRightAndFade"
           sideOffset={5}
         >
           <div className="w-full flex flex-col items-center text-jade11 text-xl">
+            <DisplayPicture
+              imgURL={userDetails.profile.profilePicture!}
+              imgSize="45"
+              imgFallback=""
+            />
 
-              <DisplayPicture
-                imgURL="https://images.unsplash.com/photo-1603415526960-f7e0328c63b1?&w=128&h=128&dpr=2&q=80"
-                imgSize="60"
-                imgFallback=""
-              />
-
-          <h1> Matt Wright </h1>
-          
+            {userDetails && <h1> {userDetails.profile?.username} </h1>}
           </div>
           {dropdownItems.map((value) => (
             <>
-            <DropdownMenu.Item onClick={()=> {value.action()}} className="group text-[13px] leading-none text-jade10 rounded-[3px] flex items-center h-[25px] px-[5px] relative pl-[25px] select-none outline-none data-[disabled]:text-mauve8 data-[disabled]:pointer-events-none data-[highlighted]:bg-jade10 data-[highlighted]:text-violet1">
-              {value.key}
-            <div className="ml-auto pl-[20px] text-mauve11 group-data-[highlighted]:text-white group-data-[disabled]:text-mauve8">
-              {value.value} 
-            </div>
-            </DropdownMenu.Item>
-            
+              <DropdownMenu.Item
+                onClick={() => {
+                  value.action();
+                }}
+                className="group text-[13px] leading-none text-jade10 rounded-[3px] flex items-center h-[25px] px-[5px] relative pl-[25px] select-none outline-none data-[disabled]:text-mauve8 data-[disabled]:pointer-events-none data-[highlighted]:bg-jade10 data-[highlighted]:text-violet1"
+              >
+                {value.key}
+                <div className="ml-auto pl-[20px] text-mauve11 group-data-[highlighted]:text-white group-data-[disabled]:text-mauve8">
+                  {value.value}
+                </div>
+              </DropdownMenu.Item>
             </>
           ))}
-          
- 
 
           <DropdownMenu.Separator className="h-[1px] bg-violet6 m-[5px]" />
           {dropdownItems2.map((value) => (
             <>
-            <DropdownMenu.Item onClick={()=> {value.action()}} className="group text-[13px] leading-none text-jade10 rounded-[3px] flex items-center h-[25px] px-[5px] relative pl-[25px] select-none outline-none data-[disabled]:text-mauve8 data-[disabled]:pointer-events-none data-[highlighted]:bg-jade10 data-[highlighted]:text-violet1">
-              {value.key}
-            <div className="ml-auto pl-[20px] text-mauve11 group-data-[highlighted]:text-white group-data-[disabled]:text-mauve8">
-              {value.value} 
-            </div>
-            </DropdownMenu.Item>
-            
+              <DropdownMenu.Item
+                onClick={() => {
+                  value.action();
+                }}
+                className="group text-[13px] leading-none text-jade10 rounded-[3px] flex items-center h-[25px] px-[5px] relative pl-[25px] select-none outline-none data-[disabled]:text-mauve8 data-[disabled]:pointer-events-none data-[highlighted]:bg-jade10 data-[highlighted]:text-violet1"
+              >
+                {value.key}
+                <div className="ml-auto pl-[20px] text-mauve11 group-data-[highlighted]:text-white group-data-[disabled]:text-mauve8">
+                  {value.value}
+                </div>
+              </DropdownMenu.Item>
             </>
           ))}
-
         </DropdownMenu.Content>
       </DropdownMenu.Portal>
     </DropdownMenu.Root>

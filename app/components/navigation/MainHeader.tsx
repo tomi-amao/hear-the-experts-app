@@ -23,23 +23,34 @@ import ManageProfile from "../cards/ManageProfileCard";
 
 interface props {
   userId: string;
+  userDetails: {
+    profile: {
+      firstName: string;
+      lastName: string;
+      username: string | null;
+      role: string | null;
+      profilePicture: string | null
+      type: string | null;
+    };
+    email: string;
+  };
 }
 
 const log = () => {
   console.log(4);
 };
 
-
-
 function MainHeader(props: props) {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const submit = useSubmit();
-  const [showProfileManage, setShowProfileManage] = useState(false)
-  
-  const profileAction = () => {
-    setShowProfileManage(preValue => !preValue)
-  }
+  const [showProfileManage, setShowProfileManage] = useState(false);
 
+  const profileAction = () => {
+    setShowProfileManage((preValue) => !preValue);
+  };
+  console.log(props.userDetails.profile.profilePicture, "TEASDASD");
+
+  // using an array of objects to store associated action with each item on dropdown menu
   const profileDropdownOptions = [
     { Profile: <ProfileIcon />, action: profileAction },
     { Inbox: <InboxIcon />, action: log },
@@ -53,50 +64,59 @@ function MainHeader(props: props) {
     { "Sign Out": <ExitIcon />, action: logout },
   ];
 
-
-
   return (
     <>
-    <nav className="">
-      <ul className="flex items-center  p-2">
-        <li className="flex-1">
-          <HamburgerMenu />
-        </li>
-        <li className=" w-32">
-          <h1 className="text-jade9 text-sm"> About </h1>
-        </li>
-        <li className="flex-1">
-          <Link to={"/dashboard"} className="text-jade9 text-sm">
-            {" "}
-            Dashboard{" "}
-          </Link>
-        </li>
-        <Form method="post" action="/login">
-          <li className="w-fit px-2 py-1 rounded-sm mx-3 text-sm bg-txtprimary">
-            <button name="_action" value={props.userId ? "logout" : "signin"}>
-              {props.userId ? "Sign Out" : "Sign In"} {}
-            </button>
+      <nav className="">
+        <ul className="flex items-center  p-2">
+          <li className="flex-1">
+            <HamburgerMenu />
           </li>
-        </Form>
-        <li>
-          <DarkModeToggle />
-        </li>
-        <li>
-          <DropdownMenus
-            trigger={
-              <DisplayPicture
-                imgURL="https://images.unsplash.com/photo-1603415526960-f7e0328c63b1?&w=128&h=128&dpr=2&q=80"
-                imgSize="45"
-                imgFallback=""
-              />
-            }
-            menuItems={profileDropdownOptions}
-            menuItems2={profileDropdownOptions2}
-          />
-        </li>
-      </ul>
-    </nav>
-    {showProfileManage && <ManageProfile setShowProfileManage={setShowProfileManage}></ManageProfile>}
+          <li className=" w-32">
+            <h1 className="text-jade9 text-sm"> About </h1>
+          </li>
+          <li className="flex-1">
+            <Link to={"/dashboard"} className="text-jade9 text-sm">
+              {" "}
+              Dashboard{" "}
+            </Link>
+          </li>
+          {!props.userId && (
+            <Form method="post" action="/login">
+              <li className="w-fit px-2 py-1 rounded-sm mx-3 text-sm bg-txtprimary">
+                <button
+                  name="_action"
+                  value={props.userId ? "logout" : "signin"}
+                >
+                  {props.userId ? "Sign Out" : "Sign In"} {}
+                </button>
+              </li>
+            </Form>
+          )}
+          <li>
+            <DarkModeToggle />
+          </li>
+          <li>
+            <DropdownMenus
+              trigger={
+                <DisplayPicture
+                  imgURL={props.userDetails.profile.profilePicture}
+                  imgSize="45"
+                  imgFallback=""
+                />
+              }
+              menuItems={profileDropdownOptions}
+              menuItems2={profileDropdownOptions2}
+              userDetails={props.userDetails}
+            />
+          </li>
+        </ul>
+      </nav>
+      {showProfileManage && (
+        <ManageProfile
+          setShowProfileManage={setShowProfileManage}
+          user={props.userDetails}
+        ></ManageProfile>
+      )}
     </>
   );
 }
