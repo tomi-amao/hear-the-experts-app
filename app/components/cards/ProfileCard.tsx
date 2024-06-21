@@ -13,11 +13,11 @@ export function ProfileCardWithHover() {
 export function ProfileCard() {
   return (
     <>
-      <div className="flex bg-bgprimary h-fit w-fit rounded-md gap-3 border-solid border-mauve1 border-b-2 mb-2 pr-12 pl-4 py-2">
+      <div className="flex bg-bgprimary rounded-md gap-3 border-solid border-altMidGrey border-b-2 mb-2 py-2 p-1">
         <div>
           <ProfileImg />
         </div>
-        <div className="flex flex-col pr-4 ">
+        <div className="flex flex-col pr-4 w-full">
           <p className="text-md text-jade9">Olivia Yuri</p>
           <p className="text-xs text-jade11"> Data Scientist</p>
         </div>

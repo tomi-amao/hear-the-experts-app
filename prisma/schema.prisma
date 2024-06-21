@@ -39,7 +39,7 @@ model Posts {
   updatedAt  DateTime     @updatedAt
   status     PostStatus
   type       UserType
-  author     User         @relation(fields: [authorId], references: [id])
+  author     User         @relation(fields: [authorId],references: [id], onDelete:Cascade)
   authorId   String       @db.ObjectId
   postLikes  PostLikes[]
   favourites Favourites[]

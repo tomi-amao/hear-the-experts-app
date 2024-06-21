@@ -71,12 +71,12 @@ export const DropdownMenus = ({
         >
           <div className="w-full flex flex-col items-center text-jade11 text-xl">
             <DisplayPicture
-              imgURL={userDetails.profile.profilePicture!}
+              imgURL={userDetails?.profile?.profilePicture}
               imgSize="45"
               imgFallback=""
             />
 
-            {userDetails && <h1> {userDetails.profile?.username} </h1>}
+            {userDetails && <h1> {userDetails?.profile?.username} </h1>}
           </div>
           {dropdownItems.map((value) => (
             <>

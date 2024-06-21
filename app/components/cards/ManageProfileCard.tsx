@@ -11,6 +11,7 @@ import { SelectDropdown } from "../utils/SelectDropdown";
 
 interface props {
   setShowProfileManage: Dispatch<SetStateAction<boolean>>;
+  returnTo: string;
   user: {
     profile: {
       firstName: string;
@@ -24,12 +25,12 @@ interface props {
   };
 }
 
-export default function ManageProfile({ setShowProfileManage, user }: props) {
+export default function ManageProfile({ setShowProfileManage, user, returnTo }: props) {
   const roleOptions = ["Software", "Finance", "Human Resources"];
 
   return (
     <Modal
-      returnTo="."
+      returnTo={returnTo}
       setShowProfileManage={setShowProfileManage}
       modalWidth="[90vw]"
       childrenStyle="w-full"
@@ -47,42 +48,45 @@ export default function ManageProfile({ setShowProfileManage, user }: props) {
               imgFallback=""
             />
             <div className="flex flex-col p-2">
-              <h1 className="text-txtprimary"> {user.profile?.username} </h1>
-              <h2 className="text-txtprimary"> {user.email} </h2>
+              <h1 className="text-lightGrey"> {user.profile?.username} </h1>
+              <h2 className="text-lightGrey"> {user.email} </h2>
             </div>
           </div>
-          <Tabs.List className="flex text-txtprimary mt-2 shrink col-start-1">
+          <Tabs.List className="flex text-lightGrey mt-2 shrink col-start-1">
             <div className="flex flex-col w-fit">
               <Tabs.Trigger value="account">
-                <li className="flex gap-3 m-1 hover:bg-txtprimary hover:text-mauve2 rounded-md px-2">
+                <li className="flex gap-3 m-1 hover:bg-lightGrey hover:text-mauve2 rounded-md px-2">
                   <AccountIcon /> Account
                 </li>
               </Tabs.Trigger>
               <Tabs.Trigger value="settings">
-                <li className="flex gap-3 m-1 hover:bg-txtprimary hover:text-mauve2 rounded-md px-2">
+                <li className="flex gap-3 m-1 hover:bg-lightGrey hover:text-mauve2 rounded-md px-2">
                   <SettingsIcon /> Settings
                 </li>
               </Tabs.Trigger>
               <Tabs.Trigger value="notifications">
-                <li className="flex gap-3 m-1 hover:bg-txtprimary hover:text-mauve2 rounded-md px-2">
+                <li className="flex gap-3 m-1 hover:bg-lightGrey hover:text-mauve2 rounded-md px-2">
                   <NotificationIcon /> Notifications
                 </li>
               </Tabs.Trigger>
               <Tabs.Trigger value="language">
-                <li className="flex gap-3 m-1 hover:bg-txtprimary hover:text-mauve2 rounded-md px-2">
+                <li className="flex gap-3 m-1 hover:bg-lightGrey hover:text-mauve2 rounded-md px-2">
                   <RegionIcon /> Language & Region
                 </li>
               </Tabs.Trigger>
             </div>
           </Tabs.List>
         </div>
-        <div className="flex col-start-2 row-start-1 row-span-2 grow text-txtprimary">
+        <div className="flex col-start-2 row-start-1 row-span-2 grow text-lightGrey">
           <Tabs.Content value="account" className="w-full">
-            <h1 className="border-b-2 border-jade10 pb-4 pt-2 mx-4">
-              {" "}
-              My Profile{" "}
+            <h1 className="border-b-2 border-midGrey pb-4 pt-2 mx-4">
+              My Profile
             </h1>
-            <Form method="post" action="/profile/manage" encType="multipart/form-data">
+            <Form
+              method="post"
+              action="/profile/manage"
+              encType="multipart/form-data"
+            >
               <div className="pt-4 mx-4 flex flex-row  w-fit">
                 <div className="flex-col items-center pt-2">
                   <DisplayPicture
@@ -107,55 +111,61 @@ export default function ManageProfile({ setShowProfileManage, user }: props) {
                 </div>
 
                 <div className="px-10">
-                  {" "}
-                    <FormField
-                      label="Preferred Name"
-                      type="text"
-                      htmlFor="username"
-                      placeholder={user.profile.username}
-                    />
-                    {/* <FormField
+                  <FormField
+                    label="Preferred Name"
+                    type="text"
+                    htmlFor="username"
+                    placeholder={user.profile.username!}
+                  />
+                  {/* <FormField
                       label="Department"
                       type="text"
                       htmlFor="department"
                       
                     /> */}
-                    <FormField
-                      label="Job role"
-                      type="text"
-                      htmlFor="role"
-                      placeholder={user.profile.role!}
-                    />
-                    {/* <SelectDropdown values={roleOptions} /> */}
+                  <FormField
+                    label="Job role"
+                    type="text"
+                    htmlFor="role"
+                    placeholder={user.profile.role!}
+                  />
+                  {/* <SelectDropdown values={roleOptions} /> */}
                   <div className="flex w-full flex-row-reverse">
                     <SecondaryButton text="Save" />
                   </div>
                 </div>
               </div>
-            </Form>{" "}
-            <h1 className="border-b-2 border-jade10 pb-4 pt-2 mx-4">
+            </Form>
+            <h1 className="border-b-2 border-midGrey pb-4 pt-2 mx-4">
               Account security
             </h1>
             <div className="pt-4  px-4   w-full">
               <h2 className="flex w-full justify-between ">
-                {" "}
-                Email <SecondaryButton text="Change email" />{" "}
+                Email <SecondaryButton text="Change email" />
               </h2>
               <h3 className="text-jade11"> {user.email}</h3>
             </div>
             <div className="pt-4  px-4   w-full">
               <h2 className="flex w-full justify-between ">
-                {" "}
-                Password <SecondaryButton text="Change password" />{" "}
+                Password <SecondaryButton text="Change password" />
               </h2>
               <h3 className="text-jade11"> ********* </h3>
             </div>
             <div className="pt-4  px-4   w-full">
               <h2 className="flex w-full justify-between ">
-                {" "}
-                Two-step Verification <SecondaryButton text="Enable" />{" "}
+                Two-step Verification <SecondaryButton text="Enable" />
               </h2>
             </div>
+            <form method="post" onSubmit={e => !confirm('Are you sure?') ? e.preventDefault() : true}>
+
+            <div className="pt-8  px-4  w-full"> 
+              <h2 className="flex w-full justify-between">
+                Danger Zone <SecondaryButton text="Delete account" name="action" value="delete" />
+              </h2>
+            
+            </div>
+            </form>
+
           </Tabs.Content>
           <Tabs.Content value="settings">
             <p>settings</p>

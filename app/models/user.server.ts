@@ -17,7 +17,9 @@ export const getUserById = async (userId: string, query: Prisma.UserSelect) => {
 
 };
 
-
+export const deleteUser = async (id: string) => {
+  await prisma.user.delete({ where: { id } });
+};
 
 export const updateUser = async (userId: string, profile: Partial<Profile>) => {
   await prisma.user.update({

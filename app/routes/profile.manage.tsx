@@ -10,10 +10,11 @@ import {
 } from "@remix-run/node";
 import { Form, Outlet, useActionData, useLoaderData } from "@remix-run/react";
 import { UserPanel } from "~/components/navigation/UserPanel";
-import { getOtherUser, requireUserId, updateUser } from "~/models/user.server";
+import { deleteUser, getOtherUser, requireUserId, updateUser } from "~/models/user.server";
 import { authenticator } from "~/services/auth.server";
 import { getUserAvatar, uploadImage } from "~/services/fileUpload.server";
 import cloudinary from "cloudinary";
+import { logout } from "~/services/session.server";
 
 export async function action({ request }: ActionFunctionArgs) {
   const userId = await requireUserId(request);
@@ -21,7 +22,8 @@ export async function action({ request }: ActionFunctionArgs) {
   // handle upload user image to cloudinary using the custom uploadimage function
   const uploadHandler: UploadHandler = composeUploadHandlers(
     async ({ name, data, contentType, filename }) => {
-      if (name !== "avatar") {
+      // only upload avatar image if the input file is named avatar
+      if (name !== "avatar" && !data) {
         return undefined;
       }
       console.log(data, filename, contentType, name);
@@ -40,10 +42,11 @@ export async function action({ request }: ActionFunctionArgs) {
   let role = formData.get("role");
   let username = formData.get("username");
   let avatar = formData.get("avatar");
-
-  console.log(typeof avatar);
-
-  console.log(avatar, "tesint avatar");
+  let action = formData.get("_action")
+  if (action === "delete") {
+    await deleteUser(userId!)
+    return logout(request)
+  }
 
   if (typeof username !== "string" || typeof role !== "string") {
     return json({ error: `Invalid Form Data` }, { status: 400 });

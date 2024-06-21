@@ -1,21 +1,21 @@
-import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
-import * as Accordion from "@radix-ui/react-accordion";
-import { ChevronDownIcon } from "@radix-ui/react-icons";
-import { forwardRef } from "react";
-import { Outlet, redirect, useLoaderData } from "@remix-run/react";
-import DarkToggle from "~/components/buttons/DarkModeToggle";
+import { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
 import {
-  ExpertSuggestionCard,
-  ExpertSuggestionCardDetail,
-} from "~/components/cards/ExpertSuggestionCard";
+  NavLink,
+  Outlet,
+  useLoaderData,
+  useLocation,
+  useParams,
+} from "@remix-run/react";
+import { useState } from "react";
 import {
   ProfileCard,
-  ProfileCardTooltip,
   ProfileCardWithHover,
 } from "~/components/cards/ProfileCard";
-import MainHeader from "~/components/navigation/MainHeader";
-import { logout } from "~/services/session.server";
-import { requireUserId } from "~/models/user.server";
+import Header from "~/components/navigation/Header";
+import ListOptions from "~/components/navigation/ListOptions";
+import { DisplayPicture } from "~/components/utils/DisplayPicture";
+import { TrendingIcon } from "~/components/utils/icons";
+import { getUserById, requireUserId } from "~/models/user.server";
 
 export const meta: MetaFunction = () => {
   return [
@@ -25,40 +25,84 @@ export const meta: MetaFunction = () => {
 };
 
 export default function IndexLayout() {
-  const userId: string = useLoaderData();
+  const location = useLocation();
+  const pathName = location.pathname.slice(1);
+
+  const { userDetails, userId } = useLoaderData<typeof loader>();
+  const [showSidebar, setShowSidebar] = useState(true);
+  const sideBarOptions = ["Feed", "Dashboard", "Messages"];
 
   return (
     <>
-      <MainHeader userId={userId} />
-      <Outlet />
+      <div className="">
+        <Header
+          userDetails={userDetails}
+          userId={userId!}
+          setShowSidebar={setShowSidebar}
+        />
+        <div className="flex ">
+          {showSidebar && (
+            <div className="w-[25%] h-screen text-lightGrey border-r-2  border-midGrey ">
+              <div className="flex flex-col items-center pt-4">
+                <DisplayPicture
+                  imgURL={userDetails?.profile?.profilePicture!}
+                  imgSize="45"
+                  imgFallback=""
+                />
+                <h2>{userDetails?.profile?.username}</h2>
+                <h3 className="text-altMidGrey">
+                  {userDetails?.profile?.type ?? "Expert"}
+                </h3>
+              </div>
+              <nav className="p-4 flex flex-col">
+                {/* use the pathname to conditionally show active sidebar option */}
+                {sideBarOptions.map((option) =>
+                  pathName === option ? (
+                    <NavLink
+                      className="cursor-pointer  bg-lightGrey text-darkGrey rounded-md px-2 py-1"
+                      to={`/${option}`}
+                    >
+                      {option}
+                    </NavLink>
+                  ) : (
+                    <NavLink
+                      className="cursor-pointer hover:bg-midGrey rounded-md p-2"
+                      to={`/${option}`}
+                    >
+                      {option}
+                    </NavLink>
+                  )
+                )}
+              </nav>
+            </div>
+          )}
+          <Outlet />
+          <div className="w-[25%]  border-l-2  border-midGrey">
+            <h1 className="text-lg text-lightGrey w-full px-4 pt-4"> Top Experts </h1>
+            <div className="p-2">
+              <ProfileCard />
+            </div>
+            <h1 className="flex gap-2 text-lg text-lightGrey w-full px-4 pt-4 items-end"> Trending Topics <TrendingIcon/> </h1>
+            <ul className="flex flex-wrap gap-2 text-xs rounded-md p-4 ">
+              <li className="bg-lightGrey rounded-md p-1 px-2">Network</li>{" "}
+              <li className="bg-lightGrey rounded-md p-1 px-2">Human Resources</li>{" "}
+              <li className="bg-lightGrey rounded-md p-1 px-2">
+                Infrastructure
+              </li>
+            </ul>
+            <h1 className="flex gap-2 text-lg text-lightGrey w-full px-4 pt-4 items-end"> Suggestions</h1>
+
+          </div>
+          
+        </div>
+      </div>
     </>
   );
 }
 
-export async function action({ request }: ActionFunctionArgs) {
-  const formData = await request.formData();
-  const action = formData.get("_action");
+export async function loader({ request }: LoaderFunctionArgs) {
+  const userId = await requireUserId(request);
+  const userDetails = await getUserById(userId!, { profile: true });
 
-  switch (action) {
-    case "logout": {
-      return await logout(request);
-    }
-    case "signin": {
-      return redirect("login");
-    }
-    default:
-      break;
-  }
+  return { userId, userDetails };
 }
-
-// export async function action({request} :ActionFunctionArgs) {
-//     const formData = await request.formData()
-//     const darkToggle =  Object.fromEntries(formData)
-//     console.log(darkToggle);
-//     console.log('hello');
-
-//     return {
-//       darkToggle
-//     }
-
-//   }
