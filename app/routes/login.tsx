@@ -237,7 +237,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
     case "login": {
       const headers = await createUserSession(request, formData);
 
-      return redirect("/dashboard", { headers });
+      return redirect("/feed", { headers });
     }
     case "register": {
       const headers = await register(userCreds, request, formData);
@@ -280,11 +280,3 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 }
 
-//   const data = { error: session.get("error") };
-
-//   return json(data, {
-//     headers: {
-//       "Set-Cookie": await commitSession(session),
-//     },
-//   });
-// }
