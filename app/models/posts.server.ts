@@ -17,22 +17,38 @@ export const createPost = async (postData: Posts) => {
   console.log(post);
 };
 
-export const getUserPosts = async (userId: string, sortFilter: Prisma.PostsOrderByWithRelationInput , whereFilter: Prisma.PostsWhereInput) => {
+export const getUserPosts = async (
+  userId: string,
+  sortFilter: Prisma.PostsOrderByWithRelationInput,
+  whereFilter: Prisma.PostsWhereInput
+) => {
   const userPosts = await prisma.posts.findMany({
-    orderBy: {...sortFilter},
-    where: {authorId: userId ,...whereFilter}
-  })
+    orderBy: { ...sortFilter },
+    where: { authorId: userId, ...whereFilter },
+  });
   console.log(whereFilter);
-  
+
   // console.log(userPosts[0].posts);
   // console.log(userPosts);
-  
-  return userPosts 
+
+  return userPosts;
+};
+export const getRecentPosts = async () => {
+  const userPosts = await prisma.posts.findMany({
+    orderBy: { updatedAt: "desc" },
+    include: {author: {select: {profile: true}}},
+    take: 4
+  });
+
+  // console.log(userPosts[0].posts);
+  // console.log(userPosts);
+
+  return userPosts;
 };
 
 export const deletePost = async (id: string) => {
-  const deletePost = await prisma.posts.delete({where: {id}})
+  const deletePost = await prisma.posts.delete({ where: { id } });
   console.log(deletePost);
-  
-  return deletePost
-}
+
+  return deletePost;
+};

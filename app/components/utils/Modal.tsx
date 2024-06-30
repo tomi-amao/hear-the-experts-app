@@ -9,7 +9,7 @@ interface props {
   setShowProfileManage: Dispatch<SetStateAction<boolean>>;
   dialogTitle?: string;
   dialogDescription?: string;
-  modalWidth: string;
+  modalWidth?: string;
   modalHeight?: string;
   childrenStyle: string
 
@@ -30,12 +30,12 @@ export function Modal({
     navigate(page);
   };
 
-  const contentStyle = `bg-bgprimary data-[state=open]:animate-contentShow fixed top-[50%] left-[50%] flex flex-col items-baseline max-h-[85vh] w-${modalWidth} max-w-450px translate-x-[-50%] translate-y-[-50%] rounded-[6px] p-[25px] focus:outline-none`;
+  const contentStyle = ` data-[state=open]:animate-contentShow fixed top-[50%] left-[50%] flex flex-col items-baseline max-h-[85vh] w-[50vw]  translate-x-[-50%] translate-y-[-50%] rounded-[6px] p-[25px] focus:outline-none`;
   return (
     <>
       <Dialog.Root defaultOpen>
         <Dialog.Portal>
-          <Dialog.Overlay className="bg-blackA6 data-[state=open]:animate-overlayShow fixed inset-0" />
+          <Dialog.Overlay className="bg-blackA6 data-[state=open]:animate-overlayShow fixed inset-0  " />
           <Dialog.Content
             className={contentStyle}
             // does not work with firefox browser

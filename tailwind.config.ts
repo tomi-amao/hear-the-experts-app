@@ -16,6 +16,7 @@ export default {
       altMidGrey: "#B0B0B0",
       lightGrey: "#D9D9D9",
       darkGrey: "#222221",
+      darkRed: "#8C333A",
       ...mauve,
       ...violet,
       ...jade,

@@ -30,7 +30,7 @@ export default function IndexLayout() {
 
   const { userDetails, userId } = useLoaderData<typeof loader>();
   const [showSidebar, setShowSidebar] = useState(true);
-  const sideBarOptions = ["Feed", "Dashboard", "Messages"];
+  const sideBarOptions = ["feed", "dashboard", "messages"];
 
   return (
     <>
@@ -50,9 +50,9 @@ export default function IndexLayout() {
                   imgFallback=""
                 />
                 <h2>{userDetails?.profile?.username}</h2>
-                <h3 className="text-altMidGrey">
+                {/* <h3 className="text-altMidGrey">
                   {userDetails?.profile?.type ?? "Expert"}
-                </h3>
+                </h3> */}
               </div>
               <nav className="p-4 flex flex-col">
                 {/* use the pathname to conditionally show active sidebar option */}
@@ -62,14 +62,14 @@ export default function IndexLayout() {
                       className="cursor-pointer  bg-lightGrey text-darkGrey rounded-md px-2 py-1"
                       to={`/${option}`}
                     >
-                      {option}
+                      {option.charAt(0).toUpperCase() + option.slice(1)}
                     </NavLink>
                   ) : (
                     <NavLink
                       className="cursor-pointer hover:bg-midGrey rounded-md p-2"
                       to={`/${option}`}
                     >
-                      {option}
+                      {option.charAt(0).toUpperCase() + option.slice(1)}
                     </NavLink>
                   )
                 )}

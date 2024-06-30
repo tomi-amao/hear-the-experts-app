@@ -38,7 +38,7 @@ model Posts {
   createdAt  DateTime     @default(now())
   updatedAt  DateTime     @updatedAt
   status     PostStatus
-  type       UserType
+  type       PostType?
   author     User         @relation(fields: [authorId],references: [id], onDelete:Cascade)
   authorId   String       @db.ObjectId
   postLikes  PostLikes[]
@@ -74,12 +74,17 @@ type Profile {
   username       String?
   profilePicture String?
   role           String?
-  type           String?
+  type           UserType?
 }
 
 enum UserType {
   EXPERT
   SENIOR
+  null
+}
+enum PostType {
+  problem
+  suggestion
 }
 
 enum PostStatus {

@@ -72,7 +72,7 @@ export default function CreateProblem() {
           </fieldset>
           <fieldset>
             <FormField type="hidden" htmlFor="status" value="UNRESOLVED" />
-            <FormField type="hidden" htmlFor="type" value="EXPERT" />
+            {/* <FormField type="hidden" htmlFor="type" value="EXPERT" /> */}
           </fieldset>
 
           <SelectDropdown values={dropdownOptions} action={addTag} />

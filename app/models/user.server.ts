@@ -12,7 +12,7 @@ import { authenticator } from "~/services/auth.server";
 import {  Prisma } from "@prisma/client";
 
 
-export const getUserById = async (userId: string, query: Prisma.UserSelect) => {
+export const getUserById = async (userId: string , query: Prisma.UserSelect) => {
   return await prisma.user.findUnique({where: {id: userId}, select: {...query}});
 
 };
