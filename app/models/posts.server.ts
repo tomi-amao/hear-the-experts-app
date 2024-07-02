@@ -33,9 +33,15 @@ export const getUserPosts = async (
 
   return userPosts;
 };
-export const getRecentPosts = async () => {
+export const getRecentPosts = async (
+  sortFilter: Prisma.PostsOrderByWithRelationInput,
+  whereFilter: Prisma.PostsWhereInput
+) => {
+  console.log(whereFilter);
+  
   const userPosts = await prisma.posts.findMany({
-    orderBy: { updatedAt: "desc" },
+    orderBy: { ...sortFilter},
+    where: {...whereFilter},
     include: {author: {select: {profile: true}}},
     take: 4
   });

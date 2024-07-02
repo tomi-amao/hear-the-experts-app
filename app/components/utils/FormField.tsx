@@ -1,5 +1,4 @@
-import { useEffect, useState, Dispatch, SetStateAction } from "react";
-import { tags } from "./Tags";
+import { useEffect, useState, Dispatch, SetStateAction, ReactNode } from "react";
 
 interface FormFieldProps {
   htmlFor: string;
@@ -125,31 +124,31 @@ export function FormTextArea({
 export default function FormOptions({
   setShowOptions,
   showOptions,
-  setSelectedOptions,
-  selectedOptions,
+
+  dropDownOptions,
+  selected,
+  setSelected,
 }: {
   setShowOptions: any;
   showOptions: any;
-  setSelectedOptions: any
-  selectedOptions: any
-}) {
-  const [selected, setSelected] = useState({tag: "Select a tag", id:0});
-  const [options, setOptions] = useState(tags);
 
+  dropDownOptions: ReactNode
+  selected: { option: string; id: number; }
+  setSelected: Dispatch<SetStateAction<{ option: string; id: number; }>>
+}) {
+  
   return (
     <>
       <div className="flex items-center">
-
         <div className=" mt-2 w-fit pb-2 ">
-          <Selected setShowOptions={setShowOptions} selected={selected.tag} showOptions={showOptions} />
-          <div className={showOptions ? "block" : "hidden" }>
-            <Options
-              options={options}
-              setSelected={setSelected}
-              setShowOptions={setShowOptions}
-              setSelectedOptions={setSelectedOptions}
-              selectedOptions={selectedOptions}
-            />
+          <Selected
+            setShowOptions={setShowOptions}
+            selected={selected?.option}
+            showOptions={showOptions}
+          />
+          <div className={showOptions ? "block" : "hidden"}>
+
+            {dropDownOptions}
           </div>
         </div>
       </div>
@@ -164,15 +163,13 @@ function Selected({
 }: {
   selected: string;
   setShowOptions: Dispatch<SetStateAction<boolean>>;
-  showOptions: boolean
+  showOptions: boolean;
 }) {
   const [toggle, setToggle] = useState(false);
 
   useEffect(() => {
-    setShowOptions(preState => !preState)
+    setShowOptions((preState) => !preState);
     console.log(showOptions);
-    
-    
   }, [toggle]);
   return (
     <button
@@ -182,7 +179,6 @@ function Selected({
       aria-expanded="true"
       aria-labelledby="listbox-label"
       onClick={() => setToggle((preState) => !preState)}
-
     >
       <span className="flex items-center">
         <span className="ml-3 block text-lightGrey truncate">{selected}</span>
@@ -212,20 +208,22 @@ function Options({
   setSelectedOptions,
   selectedOptions,
 }: {
-  options: { id: number; tag: string }[];
-  setSelected: Dispatch<SetStateAction<{ id: number; tag: string }>>;
+  options: { id: number; option: string }[];
+  setSelected: Dispatch<SetStateAction<{ id: number; option: string }>>;
   setShowOptions: Dispatch<SetStateAction<boolean>>;
-  setSelectedOptions: any
-  selectedOptions: any
+  setSelectedOptions: any;
+  selectedOptions: any;
 }) {
-  const [option, setOption] = useState<{ id: number; tag: string }>();
+  const [option, setOption] = useState<{ id: number; option: string }>();
+  
 
   // const selectOption = (option) => {
   //   setSelectedOptions([...selectedOptions, option.tag])
   // }
   useEffect(() => {
-    if (option && !selectedOptions.includes(option.tag)) {
-      setSelectedOptions([...selectedOptions, option!.tag]);
+
+    if (option && !selectedOptions.includes(option.option)) {
+      setSelectedOptions([...selectedOptions, option!.option]);
       setSelected(option);
     }
   }, [option]);
@@ -242,6 +240,7 @@ function Options({
       >
         {options.map((option) => (
           <li
+            key={option.id}
             className="relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900 hover:bg-txtprimary"
             id="listbox-option-0"
             role="option"
@@ -251,7 +250,7 @@ function Options({
           >
             <div className="flex items-center">
               <span className="ml-3 block truncate font-normal text-lightGrey">
-                {option.tag}
+                {option.option}
               </span>
             </div>
           </li>

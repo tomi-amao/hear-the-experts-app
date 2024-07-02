@@ -5,15 +5,40 @@ import FormOptions, {
   FormFieldFloating,
   FormTextArea,
 } from "../utils/FormField";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { tags } from "../utils/OptionsForDropdowns";
 
 export default function CreatePostCard() {
+  // manage form options state
   const [showOptions, setShowOptions] = useState(false);
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
+  const [selected, setSelected] = useState({ option: "Select a Tag", id: 0 });
+  
+  const [options, setOptions] = useState(tags);
+
   const deleteTag = (option: string) => {
     const filteredTags = selectedOptions.filter((tag) => option !== tag);
     setSelectedOptions(filteredTags);
   };
+
+
+  const [option, setOption] = useState<{ id: number; option: string }>();
+  const selectedTags = (selectedOption: SetStateAction<{ id: number; option: string; } | undefined>) => {
+
+  
+  
+      setOption(selectedOption)
+
+  }
+
+  useEffect(() => {
+    if (option && !selectedOptions.includes(option.option)) {
+      setSelectedOptions([...selectedOptions, option!.option]);
+      setSelected(option);
+    }  }, [option, selected]);
+
+
+
 
   return (
     <Modal
@@ -42,7 +67,7 @@ export default function CreatePostCard() {
             </fieldset>
             <fieldset className="flex flex-col gap-4 pb-3">
               <FormFieldFloating htmlFor="title" placeholder="Title" />
-              
+
               <FormTextArea
                 htmlFor="content"
                 placeholder="Share a problem/solution"
@@ -60,13 +85,22 @@ export default function CreatePostCard() {
               <FormOptions
                 setShowOptions={setShowOptions}
                 showOptions={showOptions}
-                setSelectedOptions={setSelectedOptions}
-                selectedOptions={selectedOptions}
+                selected={selected}
+                setSelected={setSelected}
+                dropDownOptions={<DropdownOptions 
+                  options={options}
+                  setSelected={setSelected}
+                  setShowOptions={setShowOptions}
+                  setOptionAction={setSelectedOptions}
+                  optionAction={selectedTags}
+                  selected={selected}
+                />}
               />
             </fieldset>
             <ul className="flex text-sm gap-2 w-full flex-wrap">
-              {selectedOptions.map((option) => (
+              {selectedOptions.map((option, index) => (
                 <li
+                  key={index}
                   onClick={() => {
                     deleteTag(option);
                   }}
@@ -196,6 +230,56 @@ function SelectType() {
           </div>
         </label>
       </li>
+    </>
+  );
+}
+
+export function DropdownOptions({
+  options,
+  setSelected,
+  setShowOptions,
+  setOptionAction: setSelectedOptions,
+  optionAction,
+  selected,
+}: {
+  options: { id: number; option: string }[];
+  setSelected: Dispatch<SetStateAction<{ id: number; option: string }>>;
+  setShowOptions: Dispatch<SetStateAction<boolean>>;
+  setOptionAction?: any;
+  optionAction: any;
+  selected: { option: string; id: number; }
+}) {
+
+
+
+  return (
+    <>
+      <ul
+        className="absolute bg-bgprimary z-10 mt-1 max-h-32 w-fit overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
+        tabIndex={-1}
+        role="listbox"
+        aria-labelledby="listbox-label"
+        aria-activedescendant="listbox-option-3"
+      >
+        {options.map((option) => (
+          <li
+            key={option.id}
+            className="relative cursor-default select-none py-2 pl-3 pr-9 text-gray-900 hover:bg-txtprimary"
+            id="listbox-option-0"
+            role="option"
+            onClick={() => {
+              optionAction(option);
+              
+            }}
+          >
+            <div className="flex items-center">
+              <span className="ml-3 block truncate font-normal text-lightGrey">
+                {option.option}
+              </span>
+            </div>
+          </li>
+        ))}
+      </ul>
     </>
   );
 }

@@ -83,7 +83,6 @@ export default function CreateProblem() {
                   filterTags(tag);
                 }}
                 className="rounded-md bg-txtprimary p-1 px-2 text-xs "
-                key={tag}
               >
                 {tag}
               </li>

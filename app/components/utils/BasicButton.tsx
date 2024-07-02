@@ -1,3 +1,5 @@
+import { act } from "react";
+
 export function PrimaryButton() {
   return (
     <>
@@ -10,7 +12,7 @@ export function PrimaryButton() {
     </>
   );
 }
-export function SecondaryButton({text, name, value} : {text:string, name?: string, value?:string}) {
+export function SecondaryButton({text, name, value, action = undefined} : {text:string, name?: string, value?:string, action?: () => {} }) {
   return (
     <>
       <button
@@ -19,6 +21,7 @@ export function SecondaryButton({text, name, value} : {text:string, name?: strin
         type="submit"
         name={name}
         value={value}
+        onClick={action}
       >
         {text}
       </button>

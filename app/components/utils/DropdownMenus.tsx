@@ -71,7 +71,7 @@ export const DropdownMenus = ({
         >
           <div className="w-full flex flex-col items-center text-jade11 text-xl">
             <DisplayPicture
-              imgURL={userDetails?.profile?.profilePicture}
+              imgURL={userDetails?.profile?.profilePicture!}
               imgSize="45"
               imgFallback=""
             />
@@ -81,6 +81,7 @@ export const DropdownMenus = ({
           {dropdownItems.map((value) => (
             <>
               <DropdownMenu.Item
+                key={value.key}
                 onClick={() => {
                   value.action();
                 }}
@@ -98,6 +99,7 @@ export const DropdownMenus = ({
           {dropdownItems2.map((value) => (
             <>
               <DropdownMenu.Item
+                key={value.key}
                 onClick={() => {
                   value.action();
                 }}

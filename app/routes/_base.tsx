@@ -56,9 +56,10 @@ export default function IndexLayout() {
               </div>
               <nav className="p-4 flex flex-col">
                 {/* use the pathname to conditionally show active sidebar option */}
-                {sideBarOptions.map((option) =>
+                {sideBarOptions.map((option, index) =>
                   pathName === option ? (
                     <NavLink
+                    key={index}
                       className="cursor-pointer  bg-lightGrey text-darkGrey rounded-md px-2 py-1"
                       to={`/${option}`}
                     >
@@ -66,6 +67,8 @@ export default function IndexLayout() {
                     </NavLink>
                   ) : (
                     <NavLink
+                    key={index}
+
                       className="cursor-pointer hover:bg-midGrey rounded-md p-2"
                       to={`/${option}`}
                     >
