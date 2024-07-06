@@ -11,7 +11,7 @@ import cloudinary from "cloudinary";
 
 
 export const loader: LoaderFunction = async ({ request }) => {
-  let user = await authenticator.isAuthenticated(request);
+  const user = await authenticator.isAuthenticated(request);
   if (user) {
     const userId = await requireUserId(request);
     const otherUsers = await getOtherUser(userId!);

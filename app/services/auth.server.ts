@@ -11,13 +11,13 @@ import invariant from "tiny-invariant";
 
 
 
-export let authenticator = new Authenticator(sessionStorage, { sessionKey: "userId", sessionErrorKey: "error"});
+export const authenticator = new Authenticator(sessionStorage, { sessionKey: "userId", sessionErrorKey: "error"});
 
 // Tell the Authenticator to use the form strategy
 authenticator.use(
     new FormStrategy(async ({ form }) => {
-      let email = form.get("email")!.toString();
-      let password = form.get("password")!.toString();
+      const email = form.get("email")!.toString();
+      const password = form.get("password")!.toString();
       // console.log(password);
       // console.log(email);
 

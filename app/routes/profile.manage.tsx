@@ -39,10 +39,10 @@ export async function action({ request }: ActionFunctionArgs) {
   );
   const formData = await parseMultipartFormData(request, uploadHandler);
 
-  let role = formData.get("role");
-  let username = formData.get("username");
-  let avatar = formData.get("avatar");
-  let action = formData.get("_action")
+  const role = formData.get("role");
+  const username = formData.get("username");
+  const avatar = formData.get("avatar");
+  const action = formData.get("_action")
   if (action === "delete") {
     await deleteUser(userId!)
     return logout(request)

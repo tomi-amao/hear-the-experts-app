@@ -16,7 +16,7 @@ import { SelectDropdown } from "~/components/utils/SelectDropdown";
 import { createPost } from "~/models/posts.server";
 import { getUserById, requireUserId } from "~/models/user.server";
 
-let nextId = 0;
+const nextId = 0;
 
 export default function CreateProblem() {
   const dropdownOptions = ["Pipelines", "Network", "App Support"];
@@ -112,7 +112,7 @@ export default function CreateProblem() {
                       cy="12"
                       r="10"
                       stroke="currentColor"
-                      stroke-width="4"
+                      strokeWidth="4"
                     ></circle>
                     <path
                       className="opacity-75"
@@ -136,7 +136,7 @@ export default function CreateProblem() {
 export async function action({ request }: ActionFunctionArgs) {
   const data = await request.formData();
   const formData = Object.fromEntries(data);
-  let tag = formData.tag;
+  const tag = formData.tag;
   const userId = await requireUserId(request);
 
   const userTags = formData.postTags;

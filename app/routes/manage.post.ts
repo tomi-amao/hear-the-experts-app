@@ -10,7 +10,7 @@ export const action: ActionFunction = async ({ request }) => {
     const userId = await requireUserId(request);
     const data = await request.formData();
     const formData = Object.fromEntries(data);    
-    let tag = formData.tag;
+    const tag = formData.tag;
 
     switch (formData._action as string) {
         case "createPost":

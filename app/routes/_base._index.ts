@@ -12,7 +12,7 @@ export const meta: MetaFunction = () => {
 };
 
 export const loader: LoaderFunction = async ({ request }) => {
-  let user = await authenticator.isAuthenticated(request);
+  const user = await authenticator.isAuthenticated(request);
   if (user) {
     return {};
   } else {

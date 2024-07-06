@@ -4,7 +4,7 @@ import type {
   MetaFunction,
 } from "@remix-run/node";
 import { CheckIcon, ChevronDownIcon } from "@radix-ui/react-icons";
-import { ReactNode, forwardRef, useEffect, useId, useState } from "react";
+import React, { ReactNode, forwardRef, useEffect, useId, useState } from "react";
 import {
   Link,
   Outlet,
@@ -20,10 +20,9 @@ import {
   CardProps,
   ExpertSuggestionCard,
 } from "~/components/cards/ExpertSuggestionCard";
-import { Prisma } from "@prisma/client";
+import { Prisma , Posts } from "@prisma/client";
 
 import * as Select from "@radix-ui/react-select";
-import React from "react";
 import { PrimaryButton, SecondaryButton } from "~/components/utils/BasicButton";
 import { ProfileCard } from "~/components/cards/ProfileCard";
 import MainHeader from "~/components/navigation/MainHeader";
@@ -33,7 +32,6 @@ import { authenticator } from "~/services/auth.server";
 import { deletePost, getUserPosts } from "~/models/posts.server";
 import { SearchBar } from "~/components/utils/SearchBar";
 import {SelectDropdown as CustomSelectDropdown} from "~/components/utils/SelectDropdown";
-import { Posts } from "@prisma/client";
 import { getUserAvatar } from "~/services/fileUpload.server";
 
 export const meta: MetaFunction = () => {
@@ -252,7 +250,7 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  let user = await authenticator.isAuthenticated(request);
+  const user = await authenticator.isAuthenticated(request);
   if (user) {
     const userId = await requireUserId(request);
     const userDetails = await getUserById(userId!, {profile: true, email: true})

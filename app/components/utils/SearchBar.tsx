@@ -2,7 +2,7 @@ import { useNavigate, useSearchParams } from '@remix-run/react'
 
 export function SearchBar() {
     const navigate = useNavigate()
-    let [searchParams] = useSearchParams()
+    const [searchParams] = useSearchParams()
   
     const clearFilters = () => {
       searchParams.delete('filter')

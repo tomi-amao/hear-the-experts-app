@@ -33,9 +33,10 @@ export const getUserPosts = async (
 
   return userPosts;
 };
-export const getRecentPosts = async (
+export const getPosts = async (
   sortFilter: Prisma.PostsOrderByWithRelationInput,
-  whereFilter: Prisma.PostsWhereInput
+  whereFilter: Prisma.PostsWhereInput,
+  numPosts: number | undefined = 4, 
 ) => {
   console.log(whereFilter);
   
@@ -43,7 +44,7 @@ export const getRecentPosts = async (
     orderBy: { ...sortFilter},
     where: {...whereFilter},
     include: {author: {select: {profile: true}}},
-    take: 4
+    take: numPosts
   });
 
   // console.log(userPosts[0].posts);

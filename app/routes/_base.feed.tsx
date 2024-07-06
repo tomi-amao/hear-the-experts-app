@@ -1,6 +1,22 @@
-import { LoaderFunctionArgs, MetaFunction, redirect } from "@remix-run/node";
-import { Form, Outlet, useLoaderData, useNavigate } from "@remix-run/react";
-import { useEffect, useRef, useState } from "react";
+import {
+  ActionFunctionArgs,
+  json,
+  LoaderFunctionArgs,
+  MetaFunction,
+  redirect,
+} from "@remix-run/node";
+import {
+  Form,
+  Outlet,
+  useActionData,
+  useLoaderData,
+  useLocation,
+  useNavigate,
+  useNavigation,
+  useSearchParams,
+  useSubmit,
+} from "@remix-run/react";
+import { act, useCallback, useEffect, useRef, useState } from "react";
 import { DropdownOptions } from "~/components/cards/CreatePostCard";
 import PostCard from "~/components/cards/PostCard";
 import Header from "~/components/navigation/Header";
@@ -10,20 +26,48 @@ import {
   filterOptionsConstant,
   sortOptionsConstant,
 } from "~/components/utils/OptionsForDropdowns";
-import { getRecentPosts } from "~/models/posts.server";
+import { getPosts } from "~/models/posts.server";
 import { getUserById, requireUserId } from "~/models/user.server";
-import { useSearchParams } from "@remix-run/react";
 import { SecondaryButton } from "~/components/utils/BasicButton";
 import { Prisma } from "@prisma/client";
+import { useInView } from "react-intersection-observer";
 
 export const meta: MetaFunction = () => {
   return [{ title: "Feed" }, { name: "Your feed", content: "List all posts" }];
 };
 
 export default function Feed() {
-  const { userDetails, userId, allPosts } = useLoaderData<typeof loader>();
-
+  const getPosts = useActionData<typeof action>();
+  const initialPosts = useLoaderData<typeof loader>();
+  const [index, setIndex] = useState<number>(4);
+  const {
+    ref: loaderRef,
+    inView,
+    entry,
+  } = useInView({
+    /* Optional options */
+    threshold: 0,
+  });
+  const location = useLocation();
+  const submit = useSubmit();
   const navigate = useNavigate();
+
+  const navigation = useNavigation();
+  const isSubmitting = navigation.formAction === `/feed${location.search}`;
+  const allPosts = getPosts?.allPosts;
+
+  const loadMorePosts = useCallback(() => {
+    if (inView) {
+      setIndex((prevIndex) => prevIndex + 1);
+
+      submit({ index }, { method: "POST", action: `/feed${location.search}` });
+    }
+  }, [inView]);
+
+  useEffect(() => {
+    loadMorePosts();
+  }, [inView]);
+
   // manage sort dropdown state
   const [showSortOptions, setShowSortOptions] = useState(false);
   const [sortSelected, setSortSelected] = useState({ option: "Sort", id: 0 });
@@ -41,13 +85,13 @@ export default function Feed() {
 
   //manage SearchParams
   const [searchParams, setSearchParams] = useSearchParams();
+
   const newSearchParams = new URLSearchParams(searchParams);
 
   const sortAndFilterAction = (selectedOption: {
     id: number;
     option: string;
   }) => {
-    
     if (sortOptionsConstant.includes(selectedOption)) {
       // ensure valid sort option
       newSearchParams.set("sort", selectedOption.option);
@@ -58,7 +102,6 @@ export default function Feed() {
       if (!tagFilters.includes(selectedOption.option)) {
         setTagFilters([...tagFilters, selectedOption.option]);
         filterRef.current = [...tagFilters, selectedOption.option];
-
       }
 
       const encodedTagFilters = JSON.stringify(filterRef.current);
@@ -130,60 +173,114 @@ export default function Feed() {
             <SecondaryButton text="clear" action={clearSearchParams} />
           </div>
           <div className="flex flex-col gap-4">
-            {allPosts.map((post) => (
+            {allPosts?.map((post) => (
               <PostCard key={post.id} post={post} />
             ))}
           </div>
         </div>
+          <div ref={loaderRef} className="flex  m-auto w-fit pt-1 ">
+            {isSubmitting && <Loading />}
+          </div>
         <Outlet />
       </div>
     </>
   );
 }
 
-export async function loader({ request }: LoaderFunctionArgs) {
+export function Loading() {
+  return (
+    <>
+      <svg
+        className="animate-spin -ml-1 mr-3 h-5 w-5 text-txtprimary "
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <circle
+          className="opacity-25"
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          strokeWidth="4"
+        ></circle>
+        <path
+          className="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+        ></path>
+      </svg>
+    </>
+  );
+}
+export async function action({ request }: ActionFunctionArgs) {
   const userId = await requireUserId(request);
   const userDetails = await getUserById(userId!, { profile: true });
-  
+  const body = await request.formData();
+
+  const action = body.get("index");
+
   // extract url queries sort and filter by constructing a new url and getSearchParams
-  const url = new URL(request.url)
-  const sort = url.searchParams.get('sort')
-  
-  let filter = url.searchParams.get('filter')
-  
+  const url = new URL(request.url);
+  const sort = url.searchParams.get("sort");
+
+  const filter = url.searchParams.get("filter");
+
   if (userId) {
-    let allPosts = await getRecentPosts({updatedAt: 'desc'}, {});
-    
+    let allPosts = await getPosts({ updatedAt: "desc" }, {});
+
     //apply filters
-  
-    let sortOptions: Prisma.PostsOrderByWithRelationInput = {}
+
+    let sortOptions: Prisma.PostsOrderByWithRelationInput = {};
     if (sort) {
-      if (sort === 'date') {
-        sortOptions = {createdAt: 'desc'}
+      if (sort === "date") {
+        sortOptions = { createdAt: "desc" };
       }
-      if (sort === 'sender') {
-        sortOptions = {author: { profile: {firstName: "desc"}}}
-        
+      if (sort === "sender") {
+        sortOptions = { author: { profile: { firstName: "desc" } } };
       }
     }
-    
-    let tagFilter: Prisma.PostsWhereInput = {}
+
+    let tagFilter: Prisma.PostsWhereInput = {};
     // do not add tag filter if there are no tags
     if (filter && filter.length > 0) {
-      const parseFilters: string[] = JSON.parse(filter)
-      
+      const parseFilters: string[] = JSON.parse(filter);
+
       tagFilter = {
-        tags:{hasSome: parseFilters}
+        tags: { hasSome: parseFilters },
+      };
+    }
+    if (
+      Object.entries(tagFilter).length ||
+      Object.entries(sortOptions).length
+    ) {
+      console.log("hellasdsdo");
+
+      if (action) {
+        console.log("sdsds");
+
+        allPosts = await getPosts(sortOptions, tagFilter, +action!);
+
+        console.log(allPosts);
+        console.log(action);
+
+        return json({ allPosts }, { status: 200 });
       }
     }
-    if (Object.entries(tagFilter).length || Object.entries(sortOptions).length) {
-  
-      
-      allPosts = await getRecentPosts(sortOptions, tagFilter)
+
+    if (action) {
+      const allPosts = await getPosts({ updatedAt: "desc" }, {}, +action);
+      return json({ allPosts }, { status: 200 });
     }
-  
+
     return { userId, userDetails, allPosts };
   } else {
     redirect("/login");
   }
+}
+
+export async function loader({ request }: LoaderFunctionArgs) {
+  const allPosts = await getPosts({ updatedAt: "desc" }, {});
+
+  return json({ allPosts }, { status: 200 });
 }

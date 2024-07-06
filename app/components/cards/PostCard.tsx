@@ -32,15 +32,15 @@ export default function PostCard({ post }: { post: post }) {
       setPostAge(postDate.toLocaleDateString())
       return ""
     } else if (days > 0) {
-      let daysOld = `${days} day${days > 1 ? "s" : ""} ago`;
+      const daysOld = `${days} day${days > 1 ? "s" : ""} ago`;
       setPostAge(daysOld);
       return daysOld; // Handle pluralization for days
     } else if (hours > 0) {
-      let hoursOld = `${hours} hour${hours > 1 ? "s" : ""} ago`;
+      const hoursOld = `${hours} hour${hours > 1 ? "s" : ""} ago`;
       setPostAge(hoursOld);
       return hoursOld; // Handle pluralization for hours
     } else {
-      let minsOld = `${minutes} minute${minutes > 1 ? "s" : ""} ago`;
+      const minsOld = `${minutes} minute${minutes > 1 ? "s" : ""} ago`;
       setPostAge(minsOld);
       return minsOld; // Handle pluralization for minutes
     }
