@@ -150,7 +150,7 @@ export async function action({ request }: ActionFunctionArgs) {
     console.log(formData);
 
     const newPost = await createPost(formData);
-    console.log(newPost);
+    
     return redirect("/dashboard");
   }
 

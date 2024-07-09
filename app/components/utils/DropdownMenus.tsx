@@ -56,7 +56,6 @@ export const DropdownMenus = ({
 
     return { key, value, action }; // Create a new object with key and value
   });
-  console.log(typeof menuItems);
 
   return (
     <DropdownMenu.Root>

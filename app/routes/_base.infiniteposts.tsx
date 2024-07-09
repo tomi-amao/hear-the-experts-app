@@ -38,7 +38,6 @@ export default function InfinitePosts() {
     loadMorePosts();
   }, [inView]);
 
-  console.log(morePosts);
   
 
   return (

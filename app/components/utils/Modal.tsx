@@ -1,6 +1,6 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { Cross2Icon } from "@radix-ui/react-icons";
-import { Form, Link, useNavigate } from "@remix-run/react";
+import { Form, Link, useNavigate, useSubmit } from "@remix-run/react";
 import { Dispatch, SetStateAction } from "react";
 
 interface props {
@@ -11,7 +11,8 @@ interface props {
   dialogDescription?: string;
   modalWidth?: string;
   modalHeight?: string;
-  childrenStyle: string
+  childrenStyle: string;
+  reloadReturnPage? : string
 
 }
 
@@ -22,12 +23,20 @@ export function Modal({
   dialogTitle,
   dialogDescription,
   modalWidth = "[50vw]",
-  childrenStyle
+  childrenStyle,
+  reloadReturnPage
 }: props) {
   const navigate = useNavigate();
+  const submit = useSubmit()
   const modalCloseHandler = (page: string) => {
     setShowProfileManage(false);
-    navigate(page);
+    navigate(page, {replace: true});
+
+    if (reloadReturnPage) {
+      
+      submit({ post: reloadReturnPage ? reloadReturnPage : ""}, { method: "POST", action: reloadReturnPage, replace: true});
+  
+  }
   };
 
   const contentStyle = ` data-[state=open]:animate-contentShow fixed top-[50%] left-[50%] flex flex-col items-baseline max-h-[85vh] w-[50vw]  translate-x-[-50%] translate-y-[-50%] rounded-[6px] p-[25px] focus:outline-none`;

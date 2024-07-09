@@ -47,7 +47,6 @@ export default function Dashboard() {
   const actionData = useActionData<typeof action>();
   const {user, userDetails, userPosts} = useLoaderData<typeof loader>();
   
-  console.log(userPosts, "help");
   const sortOptions = ['date', 'author']
   const filterOptions = ["Pipelines", "Network", "App Support"]
   const [tagFilter, setTagFilter] = useState<string[]>([]) 
@@ -256,8 +255,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
     const userDetails = await getUserById(userId!, {profile: true, email: true})
     
     let userPosts = await getUserPosts(userId!, {}, {});
-    console.log("working");
-    console.log(userDetails, "QUERRYY");
     const url = new URL(request.url)
     const sort = url.searchParams.get('sort')
     
@@ -269,7 +266,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
       filter = JSON.parse(tags)
       
     }
-    console.log(sort, filter);
     
     let sortOptions: Prisma.PostsOrderByWithRelationInput = {}
     if (sort) {
@@ -280,7 +276,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
         sortOptions = {author: { profile: {firstName: "desc"}}}
       }
     }
-    console.log(url);
     
     let tagFilter: Prisma.PostsWhereInput = {}
     // do not add tag filter if there are no tags

@@ -13,7 +13,7 @@ export default function CreatePostCard() {
   const [showOptions, setShowOptions] = useState(false);
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
   const [selected, setSelected] = useState({ option: "Select a Tag", id: 0 });
-  
+
   const [options, setOptions] = useState(tags);
 
   const deleteTag = (option: string) => {
@@ -21,30 +21,26 @@ export default function CreatePostCard() {
     setSelectedOptions(filteredTags);
   };
 
-
   const [option, setOption] = useState<{ id: number; option: string }>();
-  const selectedTags = (selectedOption: SetStateAction<{ id: number; option: string; } | undefined>) => {
-
-  
-  
-      setOption(selectedOption)
-
-  }
+  const selectedTags = (
+    selectedOption: SetStateAction<{ id: number; option: string } | undefined>
+  ) => {
+    setOption(selectedOption);
+  };
 
   useEffect(() => {
     if (option && !selectedOptions.includes(option.option)) {
       setSelectedOptions([...selectedOptions, option!.option]);
       setSelected(option);
-    }  }, [option, selected]);
-
-
-
+    }
+  }, [option, selected]);
 
   return (
     <Modal
       returnTo="/feed"
       setShowProfileManage={() => {}}
       childrenStyle="flex flex-col w-full items-center "
+      reloadReturnPage="/feed"
     >
       <div
         className="w-full h-fit bg-midGrey p-5 rounded-md grid grid-cols-[0.1fr_1fr]  "
@@ -80,6 +76,15 @@ export default function CreatePostCard() {
                 value="UNRESOLVED"
                 placeholder=""
               />
+          <Form action="/feed" method="post">
+
+              <FormField
+                type="hidden"
+                htmlFor="returnPage"
+                value="/feed"
+                placeholder=""
+              />
+              </Form>
             </fieldset>
             <fieldset>
               <FormOptions
@@ -87,14 +92,16 @@ export default function CreatePostCard() {
                 showOptions={showOptions}
                 selected={selected}
                 setSelected={setSelected}
-                dropDownOptions={<DropdownOptions 
-                  options={options}
-                  setSelected={setSelected}
-                  setShowOptions={setShowOptions}
-                  setOptionAction={setSelectedOptions}
-                  optionAction={selectedTags}
-                  selected={selected}
-                />}
+                dropDownOptions={
+                  <DropdownOptions
+                    options={options}
+                    setSelected={setSelected}
+                    setShowOptions={setShowOptions}
+                    setOptionAction={setSelectedOptions}
+                    optionAction={selectedTags}
+                    selected={selected}
+                  />
+                }
               />
             </fieldset>
             <ul className="flex text-sm gap-2 w-full flex-wrap">
@@ -247,11 +254,8 @@ export function DropdownOptions({
   setShowOptions: Dispatch<SetStateAction<boolean>>;
   setOptionAction?: any;
   optionAction: any;
-  selected: { option: string; id: number; }
+  selected: { option: string; id: number };
 }) {
-
-
-
   return (
     <>
       <ul
@@ -269,7 +273,6 @@ export function DropdownOptions({
             role="option"
             onClick={() => {
               optionAction(option);
-              
             }}
           >
             <div className="flex items-center">

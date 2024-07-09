@@ -6,7 +6,6 @@ import {
   redirect,
 } from "@remix-run/node";
 import {
-  Form,
   Outlet,
   useActionData,
   useLoaderData,
@@ -19,8 +18,6 @@ import {
 import { act, useCallback, useEffect, useRef, useState } from "react";
 import { DropdownOptions } from "~/components/cards/CreatePostCard";
 import PostCard from "~/components/cards/PostCard";
-import Header from "~/components/navigation/Header";
-import MainHeader from "~/components/navigation/MainHeader";
 import FormOptions from "~/components/utils/FormField";
 import {
   filterOptionsConstant,
@@ -38,14 +35,14 @@ export const meta: MetaFunction = () => {
 
 export default function Feed() {
   const getPosts = useActionData<typeof action>();
-  const initialPosts = useLoaderData<typeof loader>();
+  const { referer } = useLoaderData<typeof loader>();
   const [index, setIndex] = useState<number>(4);
+
   const {
     ref: loaderRef,
     inView,
     entry,
   } = useInView({
-    /* Optional options */
     threshold: 0,
   });
   const location = useLocation();
@@ -59,14 +56,27 @@ export default function Feed() {
   const loadMorePosts = useCallback(() => {
     if (inView) {
       setIndex((prevIndex) => prevIndex + 1);
+      console.log("PATHNAME", location.pathname);
 
-      submit({ index }, { method: "POST", action: `/feed${location.search}` });
+      if (location.pathname === "/feed") {
+        submit(
+          { index },
+          { method: "POST", action: `/feed${location.search}` }
+        );
+      }
     }
   }, [inView]);
 
   useEffect(() => {
     loadMorePosts();
   }, [inView]);
+
+  // get posts after user creates a post
+  useEffect(() => {
+    if (referer?.includes("feed/create/post")) {
+      submit({ index }, { method: "POST", action: `/feed${location.search}` });
+    }
+  }, [referer]);
 
   // manage sort dropdown state
   const [showSortOptions, setShowSortOptions] = useState(false);
@@ -178,9 +188,9 @@ export default function Feed() {
             ))}
           </div>
         </div>
-          <div ref={loaderRef} className="flex  m-auto w-fit pt-1 ">
-            {isSubmitting && <Loading />}
-          </div>
+        <div ref={loaderRef} className="flex  m-auto w-fit pt-1 ">
+          {isSubmitting && <Loading />}
+        </div>
         <Outlet />
       </div>
     </>
@@ -254,15 +264,10 @@ export async function action({ request }: ActionFunctionArgs) {
       Object.entries(tagFilter).length ||
       Object.entries(sortOptions).length
     ) {
-      console.log("hellasdsdo");
 
       if (action) {
-        console.log("sdsds");
 
         allPosts = await getPosts(sortOptions, tagFilter, +action!);
-
-        console.log(allPosts);
-        console.log(action);
 
         return json({ allPosts }, { status: 200 });
       }
@@ -279,8 +284,11 @@ export async function action({ request }: ActionFunctionArgs) {
   }
 }
 
-export async function loader({ request }: LoaderFunctionArgs) {
+export async function loader({ request, context }: LoaderFunctionArgs) {
   const allPosts = await getPosts({ updatedAt: "desc" }, {});
+  const headers = new Headers(request.headers);
 
-  return json({ allPosts }, { status: 200 });
+  const referer = headers.get("referer");
+
+  return { referer };
 }

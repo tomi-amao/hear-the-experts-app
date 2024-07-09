@@ -49,7 +49,6 @@ function MainHeader(props: props) {
   const profileAction = () => {
     setShowProfileManage((preValue) => !preValue);
   };
-  // console.log(props.userDetails.profile.profilePicture, "TEASDASD");
 
 
   // using an array of objects to store associated action with each item on dropdown menu

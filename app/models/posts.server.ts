@@ -14,7 +14,6 @@ export const createPost = async (postData: Posts) => {
     },
   });
 
-  console.log(post);
 };
 
 export const getUserPosts = async (
@@ -26,10 +25,7 @@ export const getUserPosts = async (
     orderBy: { ...sortFilter },
     where: { authorId: userId, ...whereFilter },
   });
-  console.log(whereFilter);
 
-  // console.log(userPosts[0].posts);
-  // console.log(userPosts);
 
   return userPosts;
 };
@@ -38,7 +34,6 @@ export const getPosts = async (
   whereFilter: Prisma.PostsWhereInput,
   numPosts: number | undefined = 4, 
 ) => {
-  console.log(whereFilter);
   
   const userPosts = await prisma.posts.findMany({
     orderBy: { ...sortFilter},
@@ -47,8 +42,7 @@ export const getPosts = async (
     take: numPosts
   });
 
-  // console.log(userPosts[0].posts);
-  // console.log(userPosts);
+
 
   return userPosts;
 };

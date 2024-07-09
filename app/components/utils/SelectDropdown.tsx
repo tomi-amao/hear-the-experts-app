@@ -25,10 +25,8 @@ interface props {
 
 export const SelectDropdown = (props: props) => {
   const [selection, setSelection] = useState<string>();
-  //   console.log(selection);
   const values = props.values;
   const action = props.action
-  console.log(values);
   const [tag, setTag] = useState<string>();
   const submit = useSubmit();
 
